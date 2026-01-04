@@ -10,11 +10,13 @@ OrbitFolio is an AI-powered portfolio analyzer and tracker for multi-market inve
 | Technical analysis (RSI, MACD, SMA) | ✅ Complete | Core |
 | Fundamental analysis (Piotroski, Altman Z) | ✅ Complete | Core |
 | Bank-specific risk model (Bank Z-Score) | ✅ Complete | Core |
-| India news sources (ET, Moneycontrol, Mint) | ✅ Complete | Phase 1 |
-| 7-Dimension sentiment scoring (Groq) | ✅ Complete | Phase 1 |
-| Macro Regime HUD (+4/-4 checklist) | ✅ Complete | Phase 2 |
-| Portfolio Multi-Agent Logic (Kelly/VaR) | 🔲 Planned | Phase 3 |
-| Predictive Dashboard & Backtesting | 🔲 Planned | Phase 4 |
+| 7-Dimension sentiment scoring (Groq) | ✅ Complete | Phase 11/12 |
+| Macro Regime HUD (+4/-4 checklist) | ✅ Complete | Phase 11/12 |
+| Enterprise Security & Auth Middleware | ✅ Complete | Phase 13 |
+| Portfolio Multi-Agent Logic (Kelly/VaR) | 🔲 Planned | Phase 14 |
+| Chat Interface & Reddit Sentiment | 🔲 Planned | Phase 14 |
+| Predictive Dashboard & Backtesting | 🔲 Planned | Phase 15 |
+
 
 ## Constraints
 1. **Zero Budget**: All APIs must be free-tier (Yahoo Finance, TwelveData 800/day, Groq 14K/day)
