@@ -1,9 +1,34 @@
 import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { ratelimit } from './lib/ratelimit'
 
 export async function middleware(req: NextRequest) {
     const res = NextResponse.next()
+
+    // ✅ RATE LIMITING: Check before anything else (100 req/hour per IP)
+    const identifier = req.ip ?? req.headers.get('x-forwarded-for') ?? 'anonymous'
+    const { success, limit, reset, remaining } = await ratelimit.limit(identifier)
+
+    if (!success) {
+        return new NextResponse(
+            JSON.stringify({
+                success: false,
+                message: `Too many requests. Try again in ${Math.ceil((reset - Date.now()) / 1000 / 60)} minutes.`,
+                retryAfter: new Date(reset).toISOString()
+            }),
+            {
+                status: 429,
+                headers: {
+                    'content-type': 'application/json',
+                    'X-RateLimit-Limit': limit.toString(),
+                    'X-RateLimit-Remaining': remaining.toString(),
+                    'X-RateLimit-Reset': new Date(reset).toISOString()
+                }
+            }
+        )
+    }
+
     const supabase = createMiddlewareClient({ req, res })
 
     // Refresh session if delayed - required for Server Components
@@ -28,7 +53,14 @@ export async function middleware(req: NextRequest) {
         )
     }
 
+    // ✅ CORS: Restrict cross-origin access
+    res.headers.set('Access-Control-Allow-Origin', req.headers.get('origin') || '*')
+    res.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+    res.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    res.headers.set('Access-Control-Max-Age', '86400')
+
     return res
+
 }
 
 export const config = {

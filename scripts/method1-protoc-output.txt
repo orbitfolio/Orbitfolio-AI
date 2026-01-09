@@ -1,0 +1,1 @@
+When using --decode_raw, no input files should be given.

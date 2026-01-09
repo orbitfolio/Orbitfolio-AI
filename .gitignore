@@ -8,3 +8,7 @@ build/
 *.log
 .vercel
 .env*.local
+
+# AI data artifacts (don't commit cache/embeddings)
+data/cache/
+data/embeddings/
