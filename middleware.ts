@@ -7,7 +7,7 @@ export async function middleware(req: NextRequest) {
     const res = NextResponse.next()
 
     // ✅ RATE LIMITING: Check before anything else (100 req/hour per IP)
-    const identifier = req.ip ?? req.headers.get('x-forwarded-for') ?? 'anonymous'
+    const identifier = (req as any).ip ?? req.headers.get('x-forwarded-for') ?? 'anonymous'
     const { success, limit, reset, remaining } = await ratelimit.limit(identifier)
 
     if (!success) {

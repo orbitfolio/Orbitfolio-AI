@@ -106,7 +106,7 @@ export function getModelConfig(strategy: 'fast' | 'smart' | 'cheap' | 'balanced'
  */
 export function getModelForTask(task: string): ModelConfig {
     // Find first model that supports this use case
-    for (const [key, config] of Object.entries(AI_MODELS)) {
+    for (const config of Object.values(AI_MODELS)) {
         if (config.useCases.includes(task)) {
             // Future: Check if provider is available
             return config;

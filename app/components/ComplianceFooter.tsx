@@ -1,37 +1,37 @@
-import React from 'react';
+"use client";
 
 const ComplianceFooter = () => {
-    return (
-        <footer className="compliance-footer">
-            <div className="container">
-                <div className="footer-grid">
-                    <div className="footer-brand">
-                        <h2 className="logo-text">OrbitFolio AI</h2>
-                        <p className="tagline">Intelligent Portfolio Analysis</p>
-                    </div>
+  return (
+    <footer className="compliance-footer">
+      <div className="container">
+        <div className="footer-grid">
+          <div className="footer-brand">
+            <h2 className="logo-text">OrbitFolio AI</h2>
+            <p className="tagline">Intelligent Portfolio Analysis</p>
+          </div>
 
-                    <div className="footer-compliance">
-                        <div className="disclaimer-title">Legal Disclaimer</div>
-                        <p className="disclaimer-text">
-                            OrbitFolio provides analytical tools for informational purposes only.
-                            <strong> This is not investment advice.</strong> Past performance does not guarantee future results.
-                            The AI Score is a mathematical representation of historical and real-time data and should not be
-                            the sole basis for any financial decision. Consult a SEBI-registered or qualified financial advisor.
-                        </p>
-                    </div>
-                </div>
+          <div className="footer-compliance">
+            <div className="disclaimer-title">Legal Disclaimer</div>
+            <p className="disclaimer-text">
+              OrbitFolio provides analytical tools for informational purposes only.
+              <strong> This is not investment advice.</strong> Past performance does not guarantee future results.
+              The AI Score is a mathematical representation of historical and real-time data and should not be
+              the sole basis for any financial decision. Consult a SEBI-registered or qualified financial advisor.
+            </p>
+          </div>
+        </div>
 
-                <div className="footer-bottom">
-                    <p>&copy; {new Date().getFullYear()} OrbitFolio AI. All rights reserved.</p>
-                    <div className="footer-links">
-                        <a href="/terms">Terms</a>
-                        <a href="/privacy">Privacy</a>
-                        <a href="/compliance">Compliance</a>
-                    </div>
-                </div>
-            </div>
+        <div className="footer-bottom">
+          <p>&copy; {new Date().getFullYear()} OrbitFolio AI. All rights reserved.</p>
+          <div className="footer-links">
+            <a href="/terms">Terms</a>
+            <a href="/privacy">Privacy</a>
+            <a href="/compliance">Compliance</a>
+          </div>
+        </div>
+      </div>
 
-            <style jsx>{`
+      <style jsx>{`
         .compliance-footer {
           background: var(--bg-dark, #0a0a0a);
           color: var(--text-muted, #a0a0a0);
@@ -103,8 +103,8 @@ const ComplianceFooter = () => {
           }
         }
       `}</style>
-        </footer>
-    );
+    </footer>
+  );
 };
 
 export default ComplianceFooter;
