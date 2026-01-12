@@ -37,6 +37,7 @@ export class GroqClient extends BaseLLM {
                 max_tokens: runtimeConfig?.maxTokens ?? this.config.maxTokens ?? 8000,
                 top_p: runtimeConfig?.topP ?? this.config.topP ?? 1,
                 stop: runtimeConfig?.stopSequences ?? this.config.stopSequences,
+                response_format: { type: 'json_object' },
             });
 
             const latencyMs = Date.now() - startTime;
