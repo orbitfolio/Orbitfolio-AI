@@ -23,6 +23,16 @@ export interface PersonaConfig {
 }
 
 export const INVESTMENT_PERSONAS: Record<PersonaType, PersonaConfig> = {
+    /**
+     * The Conservative persona prioritizes capital preservation and stable returns.
+     * It focuses on well-established companies with strong financials, indicated by:
+     * - A low Price-to-Earnings (P/E) ratio (≤ 25)
+     * - A consistent and healthy dividend yield (≥ 2.0%)
+     * - Low market volatility (Beta ≤ 1.2)
+     * - A high Piotroski F-Score (≥ 6), signifying strong financial health.
+     * This persona avoids high-risk investments, favoring instead a margin of safety
+     * and proven business models.
+     */
     CONSERVATIVE: {
         id: 'CONSERVATIVE',
         displayName: 'Conservative',
@@ -54,6 +64,16 @@ Response Rules:
 - Never mention investor names, only criteria`
     },
 
+    /**
+     * The Balanced persona seeks a mix of growth and stability.
+     * It looks for quality companies at reasonable valuations, defined by:
+     * - A moderate P/E ratio (≤ 35) to avoid speculative valuations.
+     * - Steady annual revenue growth (≥ 10%) as a sign of a healthy business.
+     * - A solid Piotroski F-Score (≥ 5) for decent financial fundamentals.
+     * - Moderate volatility (Beta ≤ 1.5), accepting some risk for growth potential.
+     * This persona is ideal for investors looking for "compounders"—companies with
+     * durable competitive advantages that can grow steadily over the long term.
+     */
     BALANCED: {
         id: 'BALANCED',
         displayName: 'Balanced',
@@ -85,6 +105,15 @@ Response Rules:
 - Never mention investor names, only criteria`
     },
 
+    /**
+     * The Growth persona prioritizes companies with high growth potential, focusing on
+     * innovation, market disruption, and scalability. Key criteria include:
+     * - Rapid revenue growth (≥ 20% annually), as this is a primary indicator of disruptive potential.
+     * - Acceptance of a high P/E ratio, as valuations are secondary to the growth trajectory.
+     * - Tolerance for high volatility (Beta ≤ 2.5), which is expected in innovative sectors.
+     * This persona targets companies with large addressable markets (TAM) and strong
+     * competitive moats, often accepting current unprofitability for future market dominance.
+     */
     GROWTH: {
         id: 'GROWTH',
         displayName: 'Growth',
