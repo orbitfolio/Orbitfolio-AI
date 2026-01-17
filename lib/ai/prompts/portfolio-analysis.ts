@@ -9,6 +9,9 @@
  * - Easy to update without touching routes
  */
 
+import { getStockAnalysisPrompt } from './stock-analysis';
+import { fillTemplate } from './utils';
+
 export interface HoldingData {
   symbol: string;
   quantity: number;
@@ -16,18 +19,6 @@ export interface HoldingData {
   currentPrice?: number;
   type: string;
   sector?: string;
-}
-
-/**
- * Replace template variables
- */
-function fillTemplate(template: string, vars: Record<string, any>): string {
-  let result = template;
-  for (const [key, value] of Object.entries(vars)) {
-    const placeholder = `{{${key}}}`;
-    result = result.replace(new RegExp(placeholder, 'g'), String(value));
-  }
-  return result;
 }
 
 /**
@@ -65,41 +56,15 @@ Provide analysis for:
 }
 
 /**
- * Individual holding analysis prompt
+ * Individual holding analysis prompt.
+ * This is now a wrapper for getStockAnalysisPrompt. Prefer the new function for single-stock analysis.
+ * @param holding The holding data.
+ * @param financialData Optional financial data string. If not provided, the holding data is serialized.
+ * @returns A system prompt for the AI model.
  */
-export function getHoldingAnalysisPrompt(holding: HoldingData): string {
-  const template = `Analyze this stock holding:
-
-Symbol: {{symbol}}
-Quantity: {{quantity}}
-Average Price: {{avgPrice}}
-Current Price: {{currentPrice}}
-Type: {{type}}
-Sector: {{sector}}
-
-Provide:
-1. **Quick Assessment** (1-2 sentences)
-2. **Risk Factors** (top 2-3)
-3. **Opportunity Score** (0-10, where 10 = strong buy)
-4. **Action** (HOLD, BUY_MORE, TRIM, SELL)
-
-**Format as JSON**:
-{
-  "assessment": string,
-  "riskFactors": string[],
-  "opportunityScore": number,
-  "action": "HOLD" | "BUY_MORE" | "TRIM" | "SELL",
-  "reasoning": string
-}`;
-
-  return fillTemplate(template, {
-    symbol: holding.symbol,
-    quantity: holding.quantity,
-    avgPrice: holding.avgPrice,
-    currentPrice: holding.currentPrice || 'N/A',
-    type: holding.type,
-    sector: holding.sector || 'Unknown'
-  });
+export function getHoldingAnalysisPrompt(holding: HoldingData, financialData?: string): string {
+  const data = financialData || JSON.stringify(holding, null, 2);
+  return getStockAnalysisPrompt(holding.symbol, data);
 }
 
 /**
@@ -377,4 +342,3 @@ Enforce: "NO CODE UNTIL IMPLEMENTATION PLAN IS APPROVED."`,
  * System prompt for all portfolio-related interactions
  */
 export const PORTFOLIO_SYSTEM_PROMPT = `You are a professional financial analyst and portfolio advisor...`;
-  
