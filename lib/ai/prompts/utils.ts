@@ -2,7 +2,6 @@
  * Shared utility functions for AI prompts.
  */
 
-import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
 /**
@@ -26,7 +25,7 @@ export function fillTemplate(template: string, vars: Record<string, any>): strin
  * @param schema The Zod schema to convert.
  * @returns A string representation of the JSON schema.
  */
-export function zodSchemaToPrompt(schema: z.ZodType<any, any>): string {
+export function zodSchemaToPrompt(schema: any): string {
   const jsonSchema = zodToJsonSchema(schema, {
     // You can add options here if needed, for example:
     // name: "MySchema",
