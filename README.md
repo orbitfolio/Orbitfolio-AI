@@ -1,232 +1,79 @@
-# Portfolio Analyzer & Tracker
+# Orbitfolio
 
-A modern, single-point portfolio analysis and tracking platform for **Indian, US & Canadian stocks**, **mutual funds**, and **cryptocurrencies**.
+Mobile-first Android PWA for tracking a demo portfolio and scoring every holding with three research pillars:
 
-## Features
+1. Technicals (RSI, MACD, SMA 50/200)
+2. Fundamentals (available PE, PB, ROE, margins, leverage, 52-week position)
+3. Third-party analyst consensus (Yahoo recommendation trend)
 
-### 📊 Portfolio Management
-- Track holdings across multiple asset classes (stocks, mutual funds, cryptocurrencies)
-- Add holdings manually or bulk upload via CSV
-- Real-time price updates (5-15 min refresh)
-- Calculate gains/losses, returns, and asset allocation
+Scores are guidance, not advice. Orbitfolio never outputs buy / sell / hold / trim / accumulate as its own recommendation. Portfolio health uses A+ to F as a grade, not a trade.
 
-### 📈 Analytics & Insights
-- **Risk Analysis**: Volatility, Sharpe Ratio, correlation matrix
-- **Technical Analysis**: Candlestick charts, moving averages, RSI, MACD, Bollinger Bands
-- **Fundamental Analysis**: Quick snapshots of key metrics
-- **Performance Tracking**: XIRR calculations, portfolio vs benchmark comparison
+v1 is a finished demo app: no login required. Holdings persist in localStorage.
 
-### 🔍 Smart Search
-- Instant search across 120k+ tickers (stocks, MFs, cryptos)
-- Support for Indian (NSE/BSE), US (NYSE/NASDAQ), and Canadian (TSX) exchanges
-- Fuzzy matching for typo tolerance
+## What this repo actually has
 
-### 🌓 User Experience
-- Dark & Light modes (optimized for all viewing conditions)
-- Fully responsive design (mobile, tablet, desktop)
-- OAuth authentication (Google/GitHub login)
-- Professional + creative UI design
+- Next.js 16 App Router, React 19, TypeScript, Tailwind
+- Dark finance UI with sticky header and bottom nav (Dashboard, Holdings, Analysis, Settings)
+- Public APIs: /api/search, /api/quotes, /api/analysis, POST /api/analysis/portfolio
+- Protected /api/holdings (Supabase session) kept from prior work
+- Shared cache: in-memory getCacheManager() plus Upstash Redis when configured, JSON files under data/cache/market/ as local fallback (quotes 15 min, analysis 6 hours)
+- Optional Groq 2-sentence rationale when GROQ_API_KEY is set; otherwise a deterministic template
+- PWA manifest, apple-touch-icon.png, icon-192/512 (any + maskable), Android install prompt
 
-### 💰 100% Free Forever
-- Zero cost to use and deploy
-- Handles 20,000+ concurrent users on free tier
-- Scales to 500k+ users without changing infrastructure
+Not built: live OAuth UI (Google/GitHub buttons hide unless Supabase public env is present), crypto, mutual funds, shadcn, TradingView charts, 120k ticker index, 500k-user infrastructure claims. CSV import is on Holdings (ticker,quantity,cost_price).
 
-## Tech Stack
+## Run locally
 
-| Layer | Technology |
-|-------|-----------|
-| **Frontend** | Next.js 15, React, TailwindCSS, shadcn/ui |
-| **Backend** | Next.js API Routes, Vercel Edge Functions |
-| **Database** | Supabase (PostgreSQL) |
-| **Authentication** | Supabase Auth (OAuth) |
-| **Data Source** | Yahoo Finance API, CoinGecko API |
-| **Charts** | TradingView Lightweight Charts, Chart.js |
-| **Hosting** | Vercel |
-| **Search** | Fuse.js (static JSON) |
+From the orbitfolio directory: install dependencies, then start the Next.js dev server. Open http://localhost:3000 and tap Open app (or go to /dashboard).
 
-## Architecture
+Useful scripts in package.json: dev, test, build, start.
 
-```
-Portfolio Analyzer Stack
-├── Frontend (Next.js + React)
-│   ├── Dashboard
-│   ├── Portfolio Management
-│   ├── Analytics & Charts
-│   └── User Settings
-├── Backend (Vercel Functions)
-│   ├── Price Sync (Yahoo Finance, CoinGecko)
-│   ├── XIRR Calculations
-│   └── Analytics Engine
-├── Database (Supabase)
-│   ├── Users & Auth
-│   ├── Holdings
-│   ├── Price Cache
-│   └── CSV Upload History
-└── Data (Static CDN)
-    └── 120k+ Ticker Search Index
-```
+## Demo mode
 
-## Getting Started
+On first visit the app seeds six holdings: AAPL, MSFT, NVDA, RELIANCE.NS, INFY.NS, SHOP.TO. Add / edit / delete from Holdings, or import CSV. Ticker search uses Yahoo. Dashboard rates every holding automatically after quotes load (concurrency 3).
 
-### Prerequisites
-- Node.js 18+
-- npm or yarn
-- GitHub account
-- Free accounts on: Vercel, Supabase
+## Environment variables (all optional)
 
-### Installation
+Do not commit secrets. Read them from process.env.
 
-1. Clone the repository
-```bash
-git clone https://github.com/yourusername/portfolio-analyzer.git
-cd portfolio-analyzer
-```
+- GROQ_API_KEY: optional 2-sentence rationale via existing Groq client
+- NEXT_PUBLIC_SUPABASE_URL: optional auth; enables Google/GitHub on /login and /api/holdings
+- NEXT_PUBLIC_SUPABASE_ANON_KEY: optional auth
+- UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN: optional rate limit (100 req/hour/IP). No-ops if unset
 
-2. Install dependencies
-```bash
-npm install
-```
+Without any of these, demo mode still works (Yahoo + in-memory cache + template rationale).
 
-3. Set up environment variables
-```bash
-cp .env.example .env.local
-```
+## Android add to Home Screen
 
-4. Configure Supabase
-- Create a free account at https://supabase.com
-- Get your API keys and update `.env.local`
+Open the site in Chrome on Android. Menu, then Add to Home screen / Install app. Launch; it opens standalone at /dashboard.
 
-5. Run development server
-```bash
-npm run dev
-```
+A service worker is not bundled. Manifest and metadata are enough for installability without caching Yahoo HTML.
 
-6. Open http://localhost:3000
+## Free-tier caching (about 5,000 users)
 
-## Deployment
+Yahoo is fetched server-side only. The client talks to same-origin /api. Quotes cache 15 minutes; analysis caches 6 hours, keyed by symbol plus UTC date. Popular tickers collapse to one Yahoo fetch per cache window, which is the main lever for a free Vercel instance. This is not a 500k-user guarantee.
 
-### Deploy to Vercel (1-click)
-```bash
-npm install -g vercel
-vercel
-```
+Upstash Redis is optional and shared across users when set (UPSTASH_REDIS_REST_URL + TOKEN). Without it, cache is in-process memory plus local JSON files under data/cache/market/ (memory resets on deploy / cold start).
 
-### Configure Environment Variables on Vercel
-- Go to Vercel Dashboard → Settings → Environment Variables
-- Add all keys from `.env.example`
+## Guidance vs advice
 
-## Project Phases
+- Orbit score 0-10 plus label: Robust / Constructive / Mixed / Cautious / Fragile
+- Weights: 35% technical, 35% fundamental, 30% analyst (renormalized if analyst data is missing)
+- Analyst recommendationKey is displayed as third-party consensus, never as Orbitfolio action
+- Compliance footer on marketing pages; compact Not investment advice line in the app shell
 
-- **Phase 1** (Week 1-2): Foundation + Auth UI
-- **Phase 2** (Week 2-3): Data Ingestion + Smart Search
-- **Phase 3** (Week 3-4): Portfolio CRUD + CSV Upload
-- **Phase 4** (Week 4-5): Analytics & Technical Charts
-- **Phase 5** (Week 5-6): UI/UX Polish & Dark Mode
-- **Phase 6** (Week 6-7): Production Launch
+## API
 
-## Supported Markets
+- GET /api/search?q= (public)
+- GET /api/quotes?symbols=AAPL,MSFT,RELIANCE.NS (public)
+- GET /api/analysis?symbol=AAPL (public)
+- POST /api/analysis/portfolio with { symbols: string[] } (public, concurrency 3)
+- GET/POST /api/holdings (session required)
 
-### Stocks
-- 🇮🇳 **India**: NSE (Nifty 50, Nifty 500, MidCap, SmallCap) + BSE
-- 🇺🇸 **USA**: NYSE, NASDAQ (S&P 500 + Russell 3000)
-- 🇨🇦 **Canada**: TSX (Toronto Stock Exchange)
+## Yahoo / Groq limits
 
-### Mutual Funds
-- 🇮🇳 **India**: AMFI-registered funds (equity, debt, balanced, liquid, hybrid)
-- 🇺🇸 **USA**: ETFs via NASDAQ/NYSE
-- 🇨🇦 **Canada**: Canadian ETFs via TSX
-
-### Cryptocurrencies
-- 50+ major cryptocurrencies (BTC, ETH, BNB, SOL, etc.)
-- Real-time prices via CoinGecko
-
-## API Rate Limits (Safety Margins)
-
-| API | Limit | Usage | Safety |
-|-----|-------|-------|--------|
-| Yahoo Finance | 500 calls/min | 50-100/min | 50× safe |
-| CoinGecko | 50k calls/min | 200-500/min | 100× safe |
-| Vercel | 1M invocations/mo | 300k/mo | 3× safe |
-| Supabase | 2M Edge Functions/mo | 300k/mo | 6× safe |
-
-## File Structure
-
-```
-portfolio-analyzer/
-├── app/
-│   ├── page.tsx              # Home page
-│   ├── dashboard/            # Dashboard pages
-│   ├── portfolio/            # Portfolio management
-│   ├── analytics/            # Analytics pages
-│   └── api/                  # API routes
-├── components/               # Reusable React components
-├── lib/                      # Utility functions
-├── public/                   # Static assets
-├── data/                     # Static ticker JSON
-├── styles/                   # Global styles
-└── middleware/               # Auth middleware
-```
-
-## Usage
-
-### Adding a Holding
-1. Go to Portfolio → Add Holding
-2. Search for ticker (start typing)
-3. Select quantity and cost price
-4. Save
-
-### Bulk Upload CSV
-1. Portfolio → Upload CSV
-2. Format: `ticker,quantity,cost_price,asset_type`
-3. Upload and verify
-4. Confirm
-
-### Viewing Analytics
-1. Dashboard → Analytics
-2. Select time period (1M, 3M, YTD, 1Y, All)
-3. View returns, risk, correlation
-
-### Technical Analysis
-1. Holdings → Select a stock
-2. Chart type (candlestick, line, area)
-3. Indicators (SMA, EMA, RSI, MACD, Bollinger Bands)
-
-## Real-World Proof
-
-This exact stack powers 200k+ users across multiple portfolio tracking apps:
-- **Tickerttracker.app** - 50k+ users
-- **Portfolioperformance** - Open-source, 100k+ users
-- **Indian fintech apps** - Pre-Series B, 100k+ users combined
-
-## Roadmap
-
-- [ ] Phase 1: Foundation + Auth (Week 1-2)
-- [ ] Phase 2: Data Ingestion (Week 2-3)
-- [ ] Phase 3: Portfolio Features (Week 3-4)
-- [ ] Phase 4: Analytics & Charts (Week 4-5)
-- [ ] Phase 5: UI Polish & Dark Mode (Week 5-6)
-- [ ] Phase 6: Production Launch (Week 6-7)
-- [ ] Advanced: Options tracking
-- [ ] Advanced: Portfolio rebalancing recommendations
-- [ ] Advanced: Tax loss harvesting insights
-
-## Contributing
-
-This is a personal project. For feature requests, open an issue.
+Yahoo public endpoints can 401/429, especially quoteSummary (crumb/cookie). Chart (/v8/finance/chart) is the price path; fundamentals and analyst data degrade to skipped fields when summary fails. Groq is unused unless a key is set (free-tier daily caps apply).
 
 ## License
 
-MIT License - feel free to fork and modify
-
-## Support
-
-- 📧 Email: orbitfolioapp@gmail.com
-- 🐦 Twitter: [Your Twitter]
-- 💬 Discord: [Community Link - Optional]
-
----
-
-**Built with ❤️ by Orbit Folio**
-
-*Free forever. Zero limits until 500k+ users.*
+MIT

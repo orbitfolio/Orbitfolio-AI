@@ -7,40 +7,42 @@
 }
 
 html {
-  color-scheme: light dark;
+  color-scheme: dark;
 }
 
 body {
-  @apply bg-white dark:bg-slate-950 text-slate-900 dark:text-white transition-colors;
-  font-feature-settings: "rlig" 1, "calt" 1;
+  @apply bg-[#070B14] text-white;
+  font-feature-settings: "rlig" 1, "calt" 1, "tnum" 1;
 }
 
 a {
-  @apply text-blue-600 dark:text-blue-400 hover:underline;
+  @apply text-teal-300;
 }
 
 button {
   @apply outline-none transition-all;
 }
 
-/* Smooth scrolling */
 html {
   scroll-behavior: smooth;
 }
 
-/* Custom scrollbar */
+.bg-orbit {
+  background: #070B14;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
 ::-webkit-scrollbar {
   @apply w-2 h-2;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-slate-100 dark:bg-slate-900;
+  @apply bg-[#070B14];
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-slate-400 dark:bg-slate-600 rounded-full;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-slate-500 dark:bg-slate-500;
+  @apply bg-slate-700 rounded-full;
 }

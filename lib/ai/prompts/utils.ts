@@ -2,6 +2,7 @@
  * Shared utility functions for AI prompts.
  */
 
+import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 
 /**
@@ -26,10 +27,24 @@ export function fillTemplate(template: string, vars: Record<string, any>): strin
  * @returns A string representation of the JSON schema.
  */
 export function zodSchemaToPrompt(schema: any): string {
-  const jsonSchema = zodToJsonSchema(schema, {
-    // You can add options here if needed, for example:
-    // name: "MySchema",
-    // target: "openApi3",
-  });
-  return JSON.stringify(jsonSchema, null, 2);
+  try {
+    const zAny = z as unknown as { toJSONSchema?: (s: unknown) => unknown };
+    if (typeof zAny.toJSONSchema === 'function') {
+      return JSON.stringify(zAny.toJSONSchema(schema), null, 2);
+    }
+    const jsonSchema = zodToJsonSchema(schema);
+    return JSON.stringify(jsonSchema, null, 2);
+  } catch {
+    return JSON.stringify(
+      {
+        type: 'object',
+        properties: {
+          rationale: { type: 'string' },
+        },
+        required: ['rationale'],
+      },
+      null,
+      2
+    );
+  }
 }

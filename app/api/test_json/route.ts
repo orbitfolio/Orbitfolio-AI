@@ -10,7 +10,7 @@ export async function GET() {
 
     const client = new GroqClient();
     try {
-        const response = await client.complete([{ role: 'user', content: 'Generate a fictional stock profile for "OrbitAI" with fields: symbol, price, sector.' }]);
+        const response = await client.complete([{ role: 'user', content: 'Generate a fictional stock profile for "OrbitAI" with fields: symbol, price, sector. Output JSON.' }]);
 
         // Simply parse and return
         let parsed;

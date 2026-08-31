@@ -12,3 +12,10 @@ build/
 # AI data artifacts (don't commit cache/embeddings)
 data/cache/
 data/embeddings/
+.tmp-tests/
+
+# Local comparison/temp artifacts
+.tmp-seed-check/
+of-cmp-run/
+tmp-cmp/
+scripts/lib/

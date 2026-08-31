@@ -30,9 +30,20 @@ export class GroqClient extends BaseLLM {
         const startTime = Date.now();
 
         try {
+            // Ensure the word "json" exists in the messages list to satisfy Groq's JSON-mode validation
+            const hasJsonKeyword = messages.some(
+                (msg) => msg.content && msg.content.toLowerCase().includes('json')
+            );
+            const finalMessages = hasJsonKeyword
+                ? messages
+                : [
+                      { role: 'system', content: 'You must respond with valid JSON.' },
+                      ...messages,
+                  ];
+
             const response = await this.client.chat.completions.create({
                 model: runtimeConfig?.model || this.config.model,
-                messages: messages as any,
+                messages: finalMessages as any,
                 temperature: runtimeConfig?.temperature ?? this.config.temperature ?? 0.7,
                 max_tokens: runtimeConfig?.maxTokens ?? this.config.maxTokens ?? 8000,
                 top_p: runtimeConfig?.topP ?? this.config.topP ?? 1,
