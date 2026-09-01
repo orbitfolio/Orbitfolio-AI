@@ -14,9 +14,10 @@ const ComplianceFooter = () => {
             <div className="disclaimer-title">Legal Disclaimer</div>
             <p className="disclaimer-text">
               OrbitFolio provides analytical tools for informational purposes only.
-              <strong> This is not investment advice.</strong> Past performance does not guarantee future results.
-              The AI Score is a mathematical representation of historical and real-time data and should not be
-              the sole basis for any financial decision. Consult a SEBI-registered or qualified financial advisor.
+              <strong> This is not investment advice.</strong> Public analysis may show a score,
+              Buy/Hold/Sell, a short rationale, and street consensus. Past performance does not
+              guarantee future results. Consult a qualified financial advisor. Orbitfolio is not a
+              registered investment advisor.
             </p>
           </div>
         </div>

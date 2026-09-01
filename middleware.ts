@@ -14,6 +14,7 @@ function isPublicApi(pathname: string): boolean {
     if (pathname.startsWith('/api/search')) return true;
     if (pathname.startsWith('/api/quotes')) return true;
     if (pathname.startsWith('/api/analysis')) return true;
+    if (pathname.startsWith('/api/health')) return true;
     if (pathname.startsWith('/api/test_json')) return true;
     return false;
 }
@@ -69,10 +70,11 @@ export async function middleware(req: NextRequest) {
     const isAccountSettings = pathname.startsWith('/settings/account');
 
     // Demo app is usable without a session. Only holdings + optional account settings need auth.
+    // Route handlers also check the session (defense in depth).
     if (isHoldingsApi && !session) {
         return new NextResponse(
             JSON.stringify({ success: false, message: 'authentication failed' }),
-            { status: 401, headers: { 'content-type': 'application/json' } }
+            { status: 401, headers: { 'content-type': 'application/json', 'Cache-Control': 'private, no-store' } }
         );
     }
 
@@ -82,14 +84,10 @@ export async function middleware(req: NextRequest) {
 
     const publicMarket = isPublicApi(pathname);
     if (publicMarket) {
-        res.headers.set("X-Orbitfolio-Mode", "public");
+        res.headers.set('X-Orbitfolio-Mode', 'public');
     }
 
-    res.headers.set('Access-Control-Allow-Origin', req.headers.get('origin') || '*');
-    res.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.headers.set('Access-Control-Max-Age', '86400');
-
+    // Same-origin HTML and APIs: do not star-CORS documents or APIs.
     return res;
 }
 

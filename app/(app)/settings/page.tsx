@@ -1,7 +1,9 @@
 'use client';
 
+import { useRef, useState } from 'react';
 import AppShell from '@/app/components/AppShell';
 import InstallPrompt from '@/app/components/InstallPrompt';
+import { parseHoldingsJson, serializeHoldingsJson } from '@/lib/holdings/json';
 import { useHoldingsStore } from '@/lib/store/holdings';
 
 const hasSupabase =
@@ -10,16 +12,96 @@ const hasSupabase =
 export default function SettingsPage() {
   const displayCurrency = useHoldingsStore((s) => s.displayCurrency);
   const setDisplayCurrency = useHoldingsStore((s) => s.setDisplayCurrency);
+  const holdings = useHoldingsStore((s) => s.holdings);
+  const replaceHoldings = useHoldingsStore((s) => s.replaceHoldings);
+  const clearHoldings = useHoldingsStore((s) => s.clearHoldings);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [ioNote, setIoNote] = useState<string | null>(null);
+
+  const exportHoldings = () => {
+    const body = serializeHoldingsJson(holdings);
+    const blob = new Blob([body], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'orbitfolio-holdings.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    setIoNote(`Exported ${holdings.length} holding${holdings.length === 1 ? '' : 's'} from this device.`);
+  };
+
+  const onImportFile = async (file: File | undefined) => {
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const parsed = parseHoldingsJson(text);
+      if (parsed.error || parsed.holdings.length === 0) {
+        setIoNote(parsed.error || 'No valid holdings in file');
+        return;
+      }
+      replaceHoldings(parsed.holdings);
+      setIoNote(`Imported ${parsed.holdings.length} holding${parsed.holdings.length === 1 ? '' : 's'} onto this device.`);
+    } catch {
+      setIoNote('Could not read that file.');
+    } finally {
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  };
+
+  const onClear = () => {
+    if (!window.confirm('Clear all holdings stored on this device? This cannot be undone.')) return;
+    clearHoldings();
+    setIoNote('Holdings cleared on this device.');
+  };
 
   return (
     <AppShell title="Settings">
       <section className="rounded-2xl border border-white/[0.08] bg-[#101827] p-4">
         <p className="text-xs uppercase tracking-wide text-slate-400">Mode</p>
-        <p className="mt-1 text-sm text-white">Demo · localStorage</p>
+        <p className="mt-1 text-sm text-white">Demo · localStorage · this device only</p>
         <p className="mt-1 text-xs text-slate-500">
-          Holdings live on this device. No login required.
+          Holdings live in this browser on this device. No login required.
           {hasSupabase ? ' Connected accounts can use /api/holdings when a session exists.' : ''}
         </p>
+      </section>
+
+      <section className="mt-4 rounded-2xl border border-white/[0.08] bg-[#101827] p-4">
+        <p className="mb-2 text-xs uppercase tracking-wide text-slate-400">Holdings JSON</p>
+        <p className="text-xs text-slate-500">
+          Export, replace, or clear the demo list stored on this device only. Importing replaces
+          the current list.
+        </p>
+        <div className="mt-3 grid grid-cols-3 gap-2">
+          <button
+            type="button"
+            onClick={exportHoldings}
+            className="min-h-[44px] rounded-xl border border-white/15 text-sm text-slate-200"
+          >
+            Export
+          </button>
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            className="min-h-[44px] rounded-xl border border-white/15 text-sm text-slate-200"
+          >
+            Import
+          </button>
+          <button
+            type="button"
+            onClick={onClear}
+            className="min-h-[44px] rounded-xl border border-rose-400/25 text-sm text-rose-300"
+          >
+            Clear
+          </button>
+        </div>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="application/json,.json"
+          className="hidden"
+          onChange={(e) => void onImportFile(e.target.files?.[0])}
+        />
+        {ioNote ? <p className="mt-3 text-xs text-teal-200">{ioNote}</p> : null}
       </section>
 
       <section className="mt-4 rounded-2xl border border-white/[0.08] bg-[#101827] p-4">
@@ -67,8 +149,10 @@ export default function SettingsPage() {
       </section>
 
       <section className="mt-4 rounded-2xl border border-white/[0.08] bg-[#101827] p-4 text-xs leading-relaxed text-slate-500">
-        Orbitfolio provides analytical tools for informational purposes only. This is not investment advice. Guidance
-        labels are not buy, sell, hold, trim, or accumulate recommendations. Consult a qualified advisor.
+        Public analysis may show an Orbit score, Buy/Hold/Sell, a short rationale, and street
+        consensus. That is research guidance, not personalized or regulated investment advice.
+        Holdings stay in localStorage on this device. Scoring weights live in the README, not on
+        the analysis screen.
       </section>
     </AppShell>
   );
