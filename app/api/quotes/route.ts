@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getCachedQuotes } from '@/lib/market/analyze';
+import { NO_STORE_HEADERS, PUBLIC_CACHE_HEADERS } from '@/lib/http/cache-headers';
 
 export async function GET(req: Request) {
     try {
@@ -13,16 +14,16 @@ export async function GET(req: Request) {
         if (symbols.length === 0) {
             return NextResponse.json(
                 { success: false, message: 'symbols query required' },
-                { status: 400 }
+                { status: 400, headers: NO_STORE_HEADERS }
             );
         }
         const data = await getCachedQuotes(symbols);
-        return NextResponse.json({ success: true, data });
+        return NextResponse.json({ success: true, data }, { headers: PUBLIC_CACHE_HEADERS });
     } catch (error) {
         console.error('[API] GET /api/quotes', error);
         return NextResponse.json(
             { success: false, message: 'Quotes unavailable' },
-            { status: 502 }
+            { status: 502, headers: NO_STORE_HEADERS }
         );
     }
 }

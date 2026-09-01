@@ -25,8 +25,21 @@ export default function AnalysisIndexPage() {
       }
     >
       <p className="mb-4 text-sm text-slate-400">
-        Client action (Buy / Hold / Sell) is derived from the Orbit score. Research labels stay descriptive. This is research guidance, not personalized regulated advice.
+        Public analysis shows score, Buy/Hold/Sell, a short rationale, and street consensus.
+        Research labels stay descriptive. This is research guidance, not personalized regulated advice.
       </p>
+      {holdings.length === 0 ? (
+        <section className="rounded-2xl border border-white/[0.08] bg-[#101827] p-6 text-center">
+          <p className="text-sm text-slate-300">No holdings yet.</p>
+          <p className="mt-1 text-xs text-slate-500">Add a ticker to start scoring. Empty lists are not an error.</p>
+          <Link
+            href="/holdings"
+            className="mt-4 inline-flex min-h-[44px] items-center rounded-xl bg-teal-400 px-4 text-sm font-semibold text-[#07201c] no-underline"
+          >
+            Add holdings
+          </Link>
+        </section>
+      ) : (
       <ul className="space-y-2">
         {holdings.map((h) => {
           const g = analyses[h.symbol]?.analysis.guidance;
@@ -46,6 +59,7 @@ export default function AnalysisIndexPage() {
           );
         })}
       </ul>
+      )}
     </AppShell>
   );
 }

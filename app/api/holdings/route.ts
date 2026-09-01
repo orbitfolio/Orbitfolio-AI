@@ -2,14 +2,30 @@ import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { HoldingSchema } from '@/lib/validations/schemas';
+import { PRIVATE_NO_STORE_HEADERS } from '@/lib/http/cache-headers';
+
+function hasSupabaseEnv(): boolean {
+    return Boolean(
+        process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    );
+}
+
+function unauthorized() {
+    return NextResponse.json(
+        { success: false, message: 'Unauthorized' },
+        { status: 401, headers: PRIVATE_NO_STORE_HEADERS }
+    );
+}
 
 export async function POST(req: Request) {
     try {
+        if (!hasSupabaseEnv()) return unauthorized();
+
         const supabase = createRouteHandlerClient({ cookies });
 
-        // Auth check (redundant but safe since middleware handles this)
+        // Auth check in the handler (not only middleware).
         const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return new NextResponse('Unauthorized', { status: 401 });
+        if (!session) return unauthorized();
 
         const body = await req.json();
 
@@ -19,7 +35,7 @@ export async function POST(req: Request) {
             return NextResponse.json({
                 success: false,
                 errors: validation.error.flatten().fieldErrors
-            }, { status: 400 });
+            }, { status: 400, headers: PRIVATE_NO_STORE_HEADERS });
         }
 
         const { data, error } = await supabase
@@ -32,29 +48,25 @@ export async function POST(req: Request) {
 
         if (error) throw error;
 
-        return NextResponse.json({ success: true, data });
-    } catch (error: any) {
-        // ✅ FIX: Generic error message, log details server-side
+        return NextResponse.json({ success: true, data }, { headers: PRIVATE_NO_STORE_HEADERS });
+    } catch (error: unknown) {
         console.error('[API Error] POST /api/holdings:', error);
         return NextResponse.json({
             success: false,
             message: 'Failed to create holding'
-        }, { status: 500 });
+        }, { status: 500, headers: PRIVATE_NO_STORE_HEADERS });
     }
 }
 
 export async function GET(req: Request) {
     try {
+        if (!hasSupabaseEnv()) return unauthorized();
+
         const supabase = createRouteHandlerClient({ cookies });
 
-        // ✅ FIX #1: Explicit auth check (defense in depth)
+        // Explicit auth check in the handler (defense in depth).
         const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-            return new NextResponse(
-                JSON.stringify({ success: false, message: 'Unauthorized' }),
-                { status: 401, headers: { 'content-type': 'application/json' } }
-            );
-        }
+        if (!session) return unauthorized();
 
         // ✅ FIX #3: Parse pagination params with validation
         const url = new URL(req.url);
@@ -75,7 +87,7 @@ export async function GET(req: Request) {
             return NextResponse.json({
                 success: false,
                 message: 'Failed to fetch holdings'
-            }, { status: 500 });
+            }, { status: 500, headers: PRIVATE_NO_STORE_HEADERS });
         }
 
         return NextResponse.json({
@@ -87,13 +99,13 @@ export async function GET(req: Request) {
                 limit,
                 totalPages: Math.ceil((count || 0) / limit)
             }
-        });
-    } catch (error: any) {
+        }, { headers: PRIVATE_NO_STORE_HEADERS });
+    } catch (error: unknown) {
         console.error('[API Error] GET /api/holdings unexpected:', error);
         return NextResponse.json({
             success: false,
             message: 'Internal Server Error'
-        }, { status: 500 });
+        }, { status: 500, headers: PRIVATE_NO_STORE_HEADERS });
     }
 }
 
