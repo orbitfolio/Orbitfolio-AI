@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { inferCurrency } from '@/lib/format';
 import { parseHoldingsCsv, type CsvHoldingRow, type CsvParseResult } from '@/lib/holdings/csv';
 import { useHoldingsStore } from '@/lib/store/holdings';
@@ -12,12 +12,11 @@ export default function ImportCsvSheet({ open, onClose }: { open: boolean; onClo
   const [parsed, setParsed] = useState<CsvParseResult | null>(null);
   const [fileName, setFileName] = useState('');
 
-  useEffect(() => {
-    if (!open) {
-      setParsed(null);
-      setFileName('');
-    }
-  }, [open]);
+  const close = () => {
+    setParsed(null);
+    setFileName('');
+    onClose();
+  };
 
   if (!open) return null;
 
@@ -33,11 +32,11 @@ export default function ImportCsvSheet({ open, onClose }: { open: boolean; onClo
     for (const row of parsed.rows) {
       applyRow(row, existingBySymbol, addHolding, updateHolding);
     }
-    onClose();
+    close();
   };
 
   return (
-    <div className="fixed inset-0 z-40 flex items-end bg-black/60" onClick={onClose}>
+    <div className="fixed inset-0 z-40 flex items-end bg-black/60" onClick={close}>
       <div
         className="w-full max-w-lg rounded-t-3xl border border-white/[0.08] bg-[#101827] p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
         onClick={(e) => e.stopPropagation()}
