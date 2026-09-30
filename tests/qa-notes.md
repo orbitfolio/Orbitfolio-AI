@@ -33,14 +33,14 @@ seedIfNeeded() is unused; first paint relies on default DEMO_SEED plus persist. 
 
 ### 3. Public APIs — PASS
 
-Middleware isPublicApi: /api/auth, /api/search, /api/quotes, /api/analysis, /api/test_json. /api/holdings returns 401 without a Supabase session.
+Middleware isPublicApi: /api/auth, /api/search, /api/quotes, /api/analysis, /api/health. /api/holdings returns 401 without a Supabase session.
 
 - GET /api/search?q= — public, Yahoo ticker search
 - GET /api/quotes?symbols= — public, batch quotes (max 30)
 - GET /api/analysis?symbol= — public, three-pillar score
 - POST /api/analysis/portfolio { symbols } — public, concurrency 3, max 30
 - GET/POST /api/holdings — session required; leftover; demo UI does not call it
-- GET /api/test_json — public Groq debug leftover
+- GET /api/test_json — public Groq debug leftover. Removed 2026-09-30 (Phase 1 cleanup).
 
 Build output matches those routes. Dashboard refreshQuotes and rateAll hit the public analysis/quotes paths.
 
@@ -80,7 +80,7 @@ None found that are one-line runtime crashes in the demo path. Ranked:
 11. Next 16 warning: middleware file convention is deprecated in favor of proxy. Build still succeeds.
 12. Footer 404s — ComplianceFooter links /terms, /privacy, /compliance; those routes are not in the build table.
 13. Empty app/api/auth — login Google/GitHub links 404 if NEXT_PUBLIC_SUPABASE_URL is set. Hidden in demo (no env).
-14. Public /api/test_json — Groq debug; 500 without key. Should not stay public.
+14. Public /api/test_json — Groq debug; 500 without key. ~~Should not stay public.~~ Resolved: route deleted 2026-09-30.
 
 When analyst data is missing, combiner still stores pillars.analystConsensus: 5 (neutral) while weightsUsed.analystConsensus is 0. UI still draws a 5.0 bar. Misleading, not a crash.
 

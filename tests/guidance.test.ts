@@ -93,7 +93,7 @@ test('serialized analysis includes Client action and keeps research labels descr
     assert.match(analysis.guidance.rationale, /research guidance for clients, not personalized regulated advice/i);
     assert.equal(analysis.guidance.action, 'Hold');
     assert.equal(
-        analysis.guidance.label === 'Buy' || analysis.guidance.label === 'Sell',
+        String(analysis.guidance.label) === 'Buy' || String(analysis.guidance.label) === 'Sell',
         false
     );
     assert.equal(

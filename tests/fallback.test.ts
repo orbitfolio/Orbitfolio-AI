@@ -11,8 +11,13 @@ import { computeTechnicals } from '../lib/market/technicals';
 import { getOfflineSeed, isDemoSymbol, scaleBarsToPrice } from '../lib/market/offline-seed';
 import { staleAnalysisCacheKey } from '../lib/market/cache-keys';
 
+type FixtureView = {
+    analysis: { symbol?: string; orbitScore?: number; guidance: { rationale: string } };
+    meta?: { stale?: boolean; source?: string };
+};
+
 test('empty Yahoo chart still returns provided stale analysis', () => {
-    const stale = {
+    const stale: FixtureView = {
         analysis: {
             symbol: 'AAPL',
             orbitScore: 7.2,
@@ -42,7 +47,7 @@ test('live chart wins over stale and offline', () => {
 });
 
 test('offline seed is last resort after empty Yahoo and no stale', () => {
-    const offline = {
+    const offline: FixtureView = {
         analysis: { guidance: { rationale: 'seeded technicals' } },
     };
     const choice = chooseAnalysisFallback({

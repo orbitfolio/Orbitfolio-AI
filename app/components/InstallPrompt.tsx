@@ -17,11 +17,10 @@ function isStandalone(): boolean {
 export default function InstallPrompt({ variant = 'banner' }: { variant?: 'banner' | 'button' }) {
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
   const [hidden, setHidden] = useState(false);
-  const [installed, setInstalled] = useState(false);
+  const [installed, setInstalled] = useState(isStandalone);
 
   useEffect(() => {
     if (isStandalone()) {
-      setInstalled(true);
       return;
     }
     const onPrompt = (event: Event) => {

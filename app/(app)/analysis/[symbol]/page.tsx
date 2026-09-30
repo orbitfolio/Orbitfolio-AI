@@ -24,56 +24,38 @@ function prettyStreetKey(key?: string | null): string {
 
 const BUSY_COPY = 'Market data is temporarily busy. Showing last saved score when available.';
 
-export default function AnalysisSymbolPage() {
-  const params = useParams<{ symbol: string }>();
-  const symbol = decodeURIComponent(params.symbol || '').toUpperCase();
+function AnalysisSymbolBody({ symbol }: { symbol: string }) {
   const cached = useHoldingsStore((s) => s.analyses[symbol]);
   const rateSymbol = useHoldingsStore((s) => s.rateSymbol);
-  const [view, setView] = useState<AnalysisView | null>(cached ?? null);
+  const [fetched, setFetched] = useState<AnalysisView | null>(null);
   const [note, setNote] = useState<string | null>(null);
   const [empty, setEmpty] = useState(false);
-  const [loading, setLoading] = useState(!cached);
   const [tick, setTick] = useState(0);
 
-  useEffect(() => {
-    if (cached) {
-      setView(cached);
-      setLoading(false);
-      setEmpty(false);
-    }
-  }, [cached]);
+  const view = fetched ?? cached ?? null;
+  const loading = !view && !empty;
 
   useEffect(() => {
     let cancelled = false;
-    const existing = useHoldingsStore.getState().analyses[symbol];
-    if (existing) {
-      setView(existing);
-      setLoading(false);
-    } else {
-      setLoading(true);
-    }
-    setNote(null);
-    setEmpty(false);
 
     (async () => {
       const result = await rateSymbol(symbol);
       if (cancelled) return;
       if (result) {
-        setView(result);
+        setFetched(result);
         setEmpty(false);
         if (result.meta?.source === 'offline') setNote('Offline sample · reconnecting to live market data');
         else if (result.meta?.stale) setNote('Using cached research while market data reconnects');
         else setNote(null);
       } else {
-        const kept = useHoldingsStore.getState().analyses[symbol] ?? existing;
+        const kept = useHoldingsStore.getState().analyses[symbol];
         if (kept) {
-          setView(kept);
+          setFetched(kept);
           setNote('Using saved score');
         } else {
           setEmpty(true);
         }
       }
-      setLoading(false);
     })();
 
     return () => {
@@ -96,7 +78,10 @@ export default function AnalysisSymbolPage() {
           <p className="text-sm text-slate-300">{BUSY_COPY}</p>
           <button
             type="button"
-            onClick={() => setTick((n) => n + 1)}
+            onClick={() => {
+              setEmpty(false);
+              setTick((n) => n + 1);
+            }}
             className="mt-3 min-h-[40px] rounded-full border border-teal-400/30 bg-teal-400/10 px-4 text-xs font-semibold text-teal-300"
           >
             Retry
@@ -159,4 +144,10 @@ export default function AnalysisSymbolPage() {
       )}
     </AppShell>
   );
+}
+
+export default function AnalysisSymbolPage() {
+  const params = useParams<{ symbol: string }>();
+  const symbol = decodeURIComponent(params.symbol || '').toUpperCase();
+  return <AnalysisSymbolBody key={symbol} symbol={symbol} />;
 }

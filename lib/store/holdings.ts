@@ -121,6 +121,8 @@ interface HoldingsState {
     addHolding: (input: Omit<Holding, 'id'>) => void;
     updateHolding: (id: string, patch: Partial<Omit<Holding, 'id'>>) => void;
     removeHolding: (id: string) => void;
+    replaceHoldings: (next: Omit<Holding, 'id'>[] | Holding[]) => void;
+    clearHoldings: () => void;
     setDisplayCurrency: (c: 'USD' | 'INR' | 'CAD') => void;
     refreshQuotes: () => Promise<void>;
     rateSymbol: (symbol: string) => Promise<AnalysisView | null>;
@@ -173,6 +175,29 @@ export const useHoldingsStore = create<HoldingsState>()(
             },
             removeHolding: (id) => {
                 set({ holdings: get().holdings.filter((h) => h.id !== id) });
+            },
+            replaceHoldings: (next) => {
+                const holdings = next.map((h) => ({
+                    ...h,
+                    id: 'id' in h && h.id ? h.id : newId(),
+                    symbol: h.symbol.toUpperCase(),
+                }));
+                set({
+                    holdings,
+                    seeded: true,
+                    analyses: {},
+                    quotes: {},
+                    healthRating: null,
+                });
+            },
+            clearHoldings: () => {
+                set({
+                    holdings: [],
+                    seeded: true,
+                    analyses: {},
+                    quotes: {},
+                    healthRating: null,
+                });
             },
             setDisplayCurrency: (c) => set({ displayCurrency: c }),
             refreshQuotes: async () => {

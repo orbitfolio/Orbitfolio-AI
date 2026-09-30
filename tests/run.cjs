@@ -20,6 +20,7 @@ const files = [
   'tests/fallback.test.ts',
   'tests/analyst.test.ts',
   'tests/search.test.ts',
+  'tests/holdings-json.test.ts',
   'lib/market/technicals.ts',
   'lib/market/fundamentals.ts',
   'lib/market/rating.ts',
@@ -31,6 +32,7 @@ const files = [
   'lib/market/cache-keys.ts',
   'lib/ai/schemas.ts',
   'lib/holdings/csv.ts',
+  'lib/holdings/json.ts',
 ];
 
 fs.rmSync(outDir, { recursive: true, force: true });
@@ -65,6 +67,7 @@ const result = spawnSync(
     path.join(outDir, 'tests/fallback.test.js'),
     path.join(outDir, 'tests/analyst.test.js'),
     path.join(outDir, 'tests/search.test.js'),
+    path.join(outDir, 'tests/holdings-json.test.js'),
   ],
   { stdio: 'inherit', cwd: root }
 );

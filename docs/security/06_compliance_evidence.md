@@ -18,12 +18,12 @@ This document serves as an audit trail and evidence repository demonstrating Orb
 | Date | Phase | Security Control Implemented | Evidence Location |
 |------|-------|----------------------------|-------------------|
 | Dec 2, 2025 | Phase 0 | `.gitignore` configured (secrets excluded) | [.gitignore](file:///C:/Users/Bhavna/Desktop/orbitfolio/.gitignore) |
-| Dec 2-25, 2025 | Phase 1-12 | Authentication via Supabase Auth | [aiChangeLog/phase-00.1](file:///C:/Users/Bhavna/Desktop/orbitfolio/aiChangeLog/phase-00.1-authentication.md) |
+| Dec 2-25, 2025 | Phase 1-12 | Authentication via Supabase Auth | [aiChangeLog/phase-00.1](../changelog/phase-00.1-authentication.md) |
 | Dec 2-25, 2025 | Phase 1-12 | RLS policies created on all tables | Supabase Dashboard |
 | Jan 4, 2026 | Phase 13 | Authentication middleware (`middleware.ts`) | [middleware.ts](file:///C:/Users/Bhavna/Desktop/orbitfolio/middleware.ts) |
 | Jan 4, 2026 | Phase 13 | Security headers (CSP, HSTS, XFO) | [next.config.js](file:///C:/Users/Bhavna/Desktop/orbitfolio/next.config.js) |
 | Jan 4, 2026 | Phase 13 | Input validation (Zod schemas) | [schemas.ts](file:///C:/Users/Bhavna/Desktop/orbitfolio/lib/validations/schemas.ts) |
-| Jan 4, 2026 | Phase 13 | Dependency vulnerability fix (Next.js) | [aiChangeLog/phase-13](file:///C:/Users/Bhavna/Desktop/orbitfolio/aiChangeLog/phase-13-enterprise-security.md) |
+| Jan 4, 2026 | Phase 13 | Dependency vulnerability fix (Next.js) | [aiChangeLog/phase-13](../changelog/phase-13-enterprise-security.md) |
 | Jan 4, 2026 | Phase 13 | Compliance disclaimer footer | [ComplianceFooter.tsx](file:///C:/Users/Bhavna/Desktop/orbitfolio/app/components/ComplianceFooter.tsx) |
 
 ---
@@ -82,7 +82,7 @@ SELECT * FROM pg_policies WHERE schemaname = 'public';
 |---------|---------------------|-----|------------------|----------|
 | `next` | 16.0.0-beta.8 | CWE-502 | 16.1.1 | Jan 4, 2026 |
 
-**Evidence**: [aiChangeLog/phase-13](file:///C:/Users/Bhavna/Desktop/orbitfolio/aiChangeLog/phase-13-enterprise-security.md)
+**Evidence**: [aiChangeLog/phase-13](../changelog/phase-13-enterprise-security.md)
 
 ---
 
@@ -231,11 +231,11 @@ if (!validation.success) {
 
 | Date | Change | Changed By | Approved By | Evidence |
 |------|--------|------------|-------------|----------|
-| Jan 4, 2026 | Added middleware auth | Antigravity AI | Bhavna (Founder) | [phase-13 changelog](file:///C:/Users/Bhavna/Desktop/orbitfolio/aiChangeLog/phase-13-enterprise-security.md) |
+| Jan 4, 2026 | Added middleware auth | Antigravity AI | Bhavna (Founder) | [phase-13 changelog](../changelog/phase-13-enterprise-security.md) |
 | Jan 4, 2026 | Added security headers | Antigravity AI | Bhav
 
-na (Founder) | [phase-13 changelog](file:///C:/Users/Bhavna/Desktop/orbitfolio/aiChangeLog/phase-13-enterprise-security.md) |
-| Jan 4, 2026 | Fixed Next.js vulnerability | Antigravity AI | Bhavna (Founder) | [phase-13 changelog](file:///C:/Users/Bhavna/Desktop/orbitfolio/aiChangeLog/phase-13-enterprise-security.md) |
+na (Founder) | [phase-13 changelog](../changelog/phase-13-enterprise-security.md) |
+| Jan 4, 2026 | Fixed Next.js vulnerability | Antigravity AI | Bhavna (Founder) | [phase-13 changelog](../changelog/phase-13-enterprise-security.md) |
 
 ---
 
@@ -258,8 +258,8 @@ na (Founder) | [phase-13 changelog](file:///C:/Users/Bhavna/Desktop/orbitfolio/a
 
 | Document | Purpose | Link |
 |----------|---------|------|
-| security_assessment.md | Current security posture | [Link](file:///C:/Users/Bhavna/Desktop/orbitfolio/security_assessment.md) |
-| phase-13-enterprise-security.md | Phase 13 detailed changelog | [Link](file:///C:/Users/Bhavna/Desktop/orbitfolio/aiChangeLog/phase-13-enterprise-security.md) |
+| security_assessment.md | Current security posture | [Link](security_assessment.md) |
+| phase-13-enterprise-security.md | Phase 13 detailed changelog | [Link](../changelog/phase-13-enterprise-security.md) |
 | Security Strategy | Overall security philosophy | [Link](file:///C:/Users/Bhavna/Desktop/orbitfolio/docs/security/01_security_strategy.md) |
 | Security Architecture | Technical implementation details | [Link](file:///C:/Users/Bhavna/Desktop/orbitfolio/docs/security/02_security_architecture.md) |
 

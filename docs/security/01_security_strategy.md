@@ -166,7 +166,7 @@ OrbitFolio operates under a unique constraint: **$0 security budget**. Despite t
 - [Security Architecture](./02_security_architecture.md)
 - [Security Policies](./03_security_policies.md)
 - [Incident Response Playbook](./04_incident_response_playbook.md)
-- [Phase 13 Security Changelog](../aiChangeLog/phase-13-enterprise-security.md)
+- [Phase 13 Security Changelog](../changelog/phase-13-enterprise-security.md)
 
 ---
 

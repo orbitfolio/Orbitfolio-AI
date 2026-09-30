@@ -22,7 +22,7 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "app/**/*.ts", "app/**/*.tsx", "lib/**/*.ts", "lib/**/*.tsx", "middleware.ts", "tailwind.config.ts"],
-  "exclude": ["node_modules", "scripts", "tests", ".next"],
+  "include": ["next-env.d.ts", "app/**/*.ts", "app/**/*.tsx", "lib/**/*.ts", "lib/**/*.tsx", "tests/**/*.ts", "middleware.ts", "tailwind.config.ts"],
+  "exclude": ["node_modules", "scripts", ".next"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
