@@ -82,6 +82,33 @@ export default function DashboardPage() {
       }));
   }, [stats.byMarket, stats.value]);
 
+  /** Holdings enriched for the table, largest position first. */
+  const rows = useMemo(() => {
+    return holdings
+      .map((h) => {
+        const q = quotes[h.symbol];
+        const g = analyses[h.symbol]?.analysis.guidance;
+        const px = q?.price ?? h.averagePrice;
+        const prev = q?.previousClose ?? px;
+        const mv = convertTo(px * h.quantity, h.currency, displayCurrency, fx);
+        const dayChange = px != null && prev != null ? (px - prev) * h.quantity : null;
+        const weight = stats.value ? (mv / stats.value) * 100 : 0;
+        return {
+          id: h.id,
+          symbol: h.symbol,
+          name: h.name,
+          price: px,
+          currency: q?.currency || h.currency,
+          dayPct: px != null && prev ? ((px - prev) / prev) * 100 : null,
+          dayAbs: dayChange != null ? convertTo(dayChange, h.currency, displayCurrency, fx) : null,
+          mv,
+          weight,
+          guidance: g ?? null,
+        };
+      })
+      .sort((a, b) => b.mv - a.mv);
+  }, [holdings, quotes, analyses, fx, displayCurrency, stats.value]);
+
   const quotesReady = Object.keys(quotes).length > 0;
   const progressLabel =
     loadingAnalysis && ratingTotal > 0
@@ -89,6 +116,8 @@ export default function DashboardPage() {
       : loadingAnalysis
         ? 'Rating holdings…'
         : 'Rate all';
+
+  const skeletonPill = 'inline-block h-4 w-16 animate-pulse rounded bg-line/10';
 
   return (
     <AppShell
@@ -117,65 +146,68 @@ export default function DashboardPage() {
         </Card>
       )}
 
-      <Card>
-        <p className="text-xs text-ink-muted">Portfolio value</p>
+      {/* Hero: portfolio value — the number people open the app for */}
+      <section className="py-2 text-center">
+        <p className="text-xs uppercase tracking-wide text-ink-muted">Portfolio value</p>
         {loadingQuotes && !quotesReady ? (
-          <p className="mt-1 text-3xl font-semibold text-ink-faint">Loading quotes…</p>
+          <div className="mx-auto mt-2 h-10 w-56 animate-pulse rounded-xl bg-line/10" />
         ) : (
-          <p className="mt-1 text-3xl font-semibold tabular-nums text-ink">
+          <p className="mt-1 text-5xl font-semibold tabular-nums tracking-tight text-ink">
             {formatMoney(stats.value, displayCurrency)}
           </p>
         )}
-        <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
-          <div>
-            <p className="text-xs text-ink-muted">Total P&amp;L</p>
-            {loadingQuotes && !quotesReady ? (
-              <p className="text-ink-faint">Loading quotes…</p>
-            ) : (
-              <p className={`tabular-nums ${stats.pnl >= 0 ? 'text-positive' : 'text-negative'}`}>
-                {formatMoney(stats.pnl, displayCurrency)} ({formatPct(stats.pnlPct)})
-              </p>
-            )}
-          </div>
-          <div>
-            <p className="text-xs text-ink-muted">Day change</p>
-            {loadingQuotes && !quotesReady ? (
-              <p className="text-ink-faint">Loading quotes…</p>
-            ) : (
-              <p className={`tabular-nums ${stats.day >= 0 ? 'text-positive' : 'text-negative'}`}>
-                {formatMoney(stats.day, displayCurrency)} ({formatPct(stats.dayPct)})
-              </p>
-            )}
-          </div>
-        </div>
-        <div className="mt-4 flex items-center justify-between rounded-xl border border-line/[0.06] bg-line/[0.03] px-3 py-2">
-          <div>
-            <p className="text-xs text-ink-muted">Health rating</p>
-            {avgScore == null ? (
-              <p className="text-sm text-ink-muted">
-                {loadingAnalysis ? progressLabel : 'Rate all to see scores'}
-              </p>
-            ) : (
-              <p className={`text-lg font-semibold ${healthColor(healthRating || 'C')}`}>
-                {healthRating || '—'}
-              </p>
-            )}
-          </div>
-          <div className="text-right">
-            <p className="text-xs text-ink-muted">Avg Orbit score</p>
-            {avgScore == null ? (
-              <p className="text-sm text-ink-muted">
-                {loadingAnalysis ? progressLabel : 'Rate all to see scores'}
-              </p>
-            ) : (
-              <p className="text-lg font-semibold tabular-nums text-ink">{avgScore}</p>
-            )}
-          </div>
-        </div>
-        {loadingAnalysis && ratingTotal > 0 && (
-          <p className="mt-3 text-sm text-accent-bright">Rating {ratingDone}/{ratingTotal} holdings…</p>
-        )}
-      </Card>
+        <p className="mt-2 text-sm tabular-nums">
+          {loadingQuotes && !quotesReady ? (
+            <span className={skeletonPill} />
+          ) : (
+            <span className={stats.pnl >= 0 ? 'text-positive' : 'text-negative'}>
+              {formatMoney(stats.pnl, displayCurrency)} ({formatPct(stats.pnlPct)}) all time
+            </span>
+          )}
+          <span className="mx-2 text-ink-faint">·</span>
+          {loadingQuotes && !quotesReady ? (
+            <span className={skeletonPill} />
+          ) : (
+            <span className={stats.day >= 0 ? 'text-positive' : 'text-negative'}>
+              {formatMoney(stats.day, displayCurrency)} ({formatPct(stats.dayPct)}) today
+            </span>
+          )}
+        </p>
+      </section>
+
+      {/* Stat tiles */}
+      <div className="mt-4 grid grid-cols-3 gap-2">
+        <Card padding="sm" className="text-center">
+          <p className="text-[10px] uppercase tracking-wide text-ink-muted">Health</p>
+          {avgScore == null ? (
+            <p className="mt-1 text-sm text-ink-faint">{loadingAnalysis ? '…' : '—'}</p>
+          ) : (
+            <p className={`mt-1 text-xl font-bold leading-none ${healthColor(healthRating || 'C')}`}>
+              {healthRating || '—'}
+            </p>
+          )}
+        </Card>
+        <Card padding="sm" className="text-center">
+          <p className="text-[10px] uppercase tracking-wide text-ink-muted">Avg score</p>
+          {avgScore == null ? (
+            <p className="mt-1 text-sm text-ink-faint">{loadingAnalysis ? '…' : '—'}</p>
+          ) : (
+            <p className="mt-1 text-xl font-bold leading-none tabular-nums text-ink">
+              {avgScore.toFixed(1)}
+            </p>
+          )}
+        </Card>
+        <Card padding="sm" className="text-center">
+          <p className="text-[10px] uppercase tracking-wide text-ink-muted">Holdings</p>
+          <p className="mt-1 text-xl font-bold leading-none tabular-nums text-ink">{holdings.length}</p>
+        </Card>
+      </div>
+
+      {loadingAnalysis && ratingTotal > 0 && (
+        <p className="mt-3 text-center text-sm text-accent-bright">
+          Rating {ratingDone}/{ratingTotal} holdings…
+        </p>
+      )}
 
       <Card className="mt-4">
         <p className="mb-3 text-xs uppercase tracking-wide text-ink-muted">Allocation</p>
@@ -194,32 +226,104 @@ export default function DashboardPage() {
         </div>
       </Card>
 
-      <section className="mt-4 space-y-2">
-        <p className="text-xs uppercase tracking-wide text-ink-muted">Holdings</p>
-        {holdings.map((h) => {
-          const q = quotes[h.symbol];
-          const g = analyses[h.symbol]?.analysis.guidance;
-          const px = q?.price ?? h.averagePrice;
-          const mv = convertTo(px * h.quantity, h.currency, displayCurrency, fx);
-          return (
-            <Link
-              key={h.id}
-              href={`/analysis/${encodeURIComponent(h.symbol)}`}
-              className="flex min-h-[72px] items-center justify-between rounded-2xl border border-line/[0.08] bg-card px-3 py-3 no-underline"
-            >
-              <div className="min-w-0">
-                <p className="font-semibold tabular-nums text-ink">{h.symbol}</p>
-                <p className="truncate text-xs text-ink-muted">{h.name}</p>
-              </div>
-              <div className="ml-3 text-right">
-                <p className="tabular-nums text-sm text-ink">{formatMoney(mv, displayCurrency)}</p>
-                <div className="mt-1 flex justify-end">
-                  <GuidanceBadge label={g?.label} score={g?.orbitScore} action={g?.action} />
-                </div>
-              </div>
-            </Link>
-          );
-        })}
+      {/* Holdings — table on desktop, cards on mobile */}
+      <section className="mt-4">
+        <p className="mb-2 text-xs uppercase tracking-wide text-ink-muted">Holdings</p>
+
+        {holdings.length === 0 ? null : (
+          <>
+            {/* Desktop table */}
+            <Card padding="none" className="hidden overflow-hidden lg:block">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-line/[0.08] text-[10px] uppercase tracking-wide text-ink-muted">
+                    <th className="px-4 py-2.5 font-medium">Symbol</th>
+                    <th className="px-2 py-2.5 text-right font-medium">Price</th>
+                    <th className="px-2 py-2.5 text-right font-medium">Day</th>
+                    <th className="px-2 py-2.5 text-right font-medium">Value</th>
+                    <th className="px-2 py-2.5 text-right font-medium">Weight</th>
+                    <th className="px-4 py-2.5 text-right font-medium">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((r) => (
+                    <tr
+                      key={r.id}
+                      className="border-b border-line/[0.05] transition-colors last:border-0 hover:bg-line/[0.03]"
+                    >
+                      <td className="px-4 py-3">
+                        <Link
+                          href={`/analysis/${encodeURIComponent(r.symbol)}`}
+                          className="block no-underline"
+                        >
+                          <span className="block font-semibold tabular-nums text-ink">{r.symbol}</span>
+                          <span className="block max-w-[180px] truncate text-xs text-ink-muted">{r.name}</span>
+                        </Link>
+                      </td>
+                      <td className="px-2 py-3 text-right tabular-nums text-ink-secondary">
+                        {r.price != null ? formatMoney(r.price, r.currency) : '—'}
+                      </td>
+                      <td
+                        className={`px-2 py-3 text-right tabular-nums ${
+                          r.dayPct == null ? 'text-ink-faint' : r.dayPct >= 0 ? 'text-positive' : 'text-negative'
+                        }`}
+                      >
+                        {r.dayPct != null ? formatPct(r.dayPct, 1) : '—'}
+                      </td>
+                      <td className="px-2 py-3 text-right font-semibold tabular-nums text-ink">
+                        {formatMoney(r.mv, displayCurrency)}
+                      </td>
+                      <td className="px-2 py-3 text-right tabular-nums text-ink-secondary">
+                        {r.weight.toFixed(0)}%
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex justify-end">
+                          <GuidanceBadge
+                            label={r.guidance?.label}
+                            score={r.guidance?.orbitScore}
+                            action={r.guidance?.action}
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Card>
+
+            {/* Mobile cards */}
+            <div className="space-y-2 lg:hidden">
+              {rows.map((r) => (
+                <Link
+                  key={r.id}
+                  href={`/analysis/${encodeURIComponent(r.symbol)}`}
+                  className="flex min-h-[72px] items-center justify-between rounded-2xl border border-line/[0.08] bg-card px-3 py-3 no-underline"
+                >
+                  <div className="min-w-0">
+                    <p className="font-semibold tabular-nums text-ink">{r.symbol}</p>
+                    <p className="truncate text-xs text-ink-muted">{r.name}</p>
+                    <p
+                      className={`mt-0.5 text-xs tabular-nums ${
+                        r.dayPct == null ? 'text-ink-faint' : r.dayPct >= 0 ? 'text-positive' : 'text-negative'
+                      }`}
+                    >
+                      {r.dayPct != null ? formatPct(r.dayPct, 1) : '—'} · {formatMoney(r.price ?? 0, r.currency)}
+                    </p>
+                  </div>
+                  <div className="ml-3 text-right">
+                    <p className="tabular-nums text-sm font-semibold text-ink">
+                      {formatMoney(r.mv, displayCurrency)}
+                    </p>
+                    <p className="text-[11px] tabular-nums text-ink-faint">{r.weight.toFixed(0)}% of book</p>
+                    <div className="mt-1 flex justify-end">
+                      <GuidanceBadge label={r.guidance?.label} score={r.guidance?.orbitScore} action={r.guidance?.action} />
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </>
+        )}
       </section>
     </AppShell>
   );
