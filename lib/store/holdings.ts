@@ -48,6 +48,7 @@ export interface AnalysisView {
             };
             weightsUsed?: { technical: number; fundamental: number; analystConsensus: number };
             analystAvailable?: boolean;
+            riskAdjustment?: number | null;
         };
         generatedAt: string;
     };

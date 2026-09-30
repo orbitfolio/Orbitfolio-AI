@@ -60,6 +60,8 @@ export const GuidanceSchema = z.object({
         analystConsensus: z.number(),
     }).optional(),
     analystAvailable: z.boolean().optional(),
+    /** Capped beta risk adjustment applied to the technical pillar; null = no beta data. */
+    riskAdjustment: z.number().min(-1.25).max(1.25).nullable().optional(),
 });
 
 /** @deprecated Replaced by GuidanceSchema. Kept as a type alias so old imports compile. */

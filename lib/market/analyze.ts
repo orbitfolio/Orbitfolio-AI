@@ -271,11 +271,15 @@ async function buildViewFromChart(
         averageAnalystRating: summary?.averageAnalystRating,
     });
 
-    const combined = combineRating({
-        technical: technicals.score,
-        fundamental: fundamentals.score,
-        analystConsensus: analyst.available ? analyst.score : null,
-    });
+    const combined = combineRating(
+        {
+            technical: technicals.score,
+            fundamental: fundamentals.score,
+            analystConsensus: analyst.available ? analyst.score : null,
+        },
+        // A3: capped beta risk adjustment, part of the production score.
+        { beta: summary?.beta }
+    );
 
     const quote: YahooQuote = {
         ...chart.quote,
@@ -361,6 +365,7 @@ async function buildViewFromChart(
         },
         weightsUsed: combined.weightsUsed,
         analystAvailable: combined.analystAvailable,
+        riskAdjustment: combined.riskAdjustment,
     });
 
     const analysis = StockAnalysisSchema.parse({
