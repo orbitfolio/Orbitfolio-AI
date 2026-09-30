@@ -6,8 +6,12 @@ import AppShell from '@/app/components/AppShell';
 import GuidanceBadge from '@/app/components/GuidanceBadge';
 import InstallPrompt from '@/app/components/InstallPrompt';
 import Card from '@/app/components/Card';
-import { formatMoney, formatPct, healthColor } from '@/lib/format';
+import { formatMoney, formatPct, formatQuoteAge, healthColor } from '@/lib/format';
 import { convertTo, useHoldingsStore } from '@/lib/store/holdings';
+import { useNow } from '@/lib/useNow';
+
+/** Minutes after which a visible "as of …" label appears next to the hero value. */
+const QUOTE_AGE_NOTICE_MS = 20 * 60 * 1000;
 
 export default function DashboardPage() {
   const holdings = useHoldingsStore((s) => s.holdings);
@@ -22,17 +26,36 @@ export default function DashboardPage() {
   const ratingTotal = useHoldingsStore((s) => s.ratingTotal);
   const refreshQuotes = useHoldingsStore((s) => s.refreshQuotes);
   const rateAll = useHoldingsStore((s) => s.rateAll);
+  const quotesFetchedAt = useHoldingsStore((s) => s.quotesFetchedAt);
+  const quotesFailed = useHoldingsStore((s) => s.quotesFailed);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       await refreshQuotes();
+      if (useHoldingsStore.getState().quotesFailed && !cancelled) {
+        // One silent retry after a pause, then leave the failure visible
+        // with a manual Retry instead of looping against a throttling API.
+        await new Promise((r) => setTimeout(r, 4000));
+        if (cancelled) return;
+        await refreshQuotes({ force: true });
+      }
       if (!cancelled) await rateAll();
     })();
     return () => {
       cancelled = true;
     };
   }, [refreshQuotes, rateAll]);
+
+  // Ticking clock keeps the quote-age label current while the page is open.
+  const now = useNow(60_000);
+  const quoteAge =
+    quotesFetchedAt != null && now != null && !(loadingQuotes && !quotesFetchedAt)
+      ? now - quotesFetchedAt
+      : null;
+  const showQuoteAge = quoteAge != null && quoteAge >= QUOTE_AGE_NOTICE_MS;
+  const showDegraded =
+    !loadingQuotes && quotesFailed && quotesFetchedAt == null;
 
   const stats = useMemo(() => {
     let value = 0;
@@ -149,6 +172,21 @@ export default function DashboardPage() {
       {/* Hero: portfolio value — the number people open the app for */}
       <section className="py-2 text-center">
         <p className="text-xs uppercase tracking-wide text-ink-muted">Portfolio value</p>
+        {showDegraded && (
+          <div className="mx-auto mt-2 flex max-w-fit items-center gap-2 rounded-full border border-warning/30 bg-warning/10 px-3 py-1 text-[11px] text-ink-secondary">
+            <span>Market data unavailable — showing your entries</span>
+            <button
+              type="button"
+              onClick={() => void refreshQuotes({ force: true })}
+              className="min-h-[28px] rounded-full border border-accent/30 bg-accent/10 px-2 text-[11px] font-semibold text-accent-bright"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+        {!showDegraded && showQuoteAge && (
+          <p className="mt-1 text-[11px] text-ink-faint">Prices as of {formatQuoteAge(quoteAge)}</p>
+        )}
         {loadingQuotes && !quotesReady ? (
           <div className="mx-auto mt-2 h-10 w-56 animate-pulse rounded-xl bg-line/10" />
         ) : (

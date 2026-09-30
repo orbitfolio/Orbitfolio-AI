@@ -287,6 +287,9 @@ async function buildViewFromChart(
         fiftyTwoWeekHigh: summary?.fiftyTwoWeekHigh ?? chart.quote.fiftyTwoWeekHigh,
         fiftyTwoWeekLow: summary?.fiftyTwoWeekLow ?? chart.quote.fiftyTwoWeekLow,
         price: chart.quote.price ?? summary?.lastPrice ?? null,
+        // Honest provenance: when the chart came from the offline sample, the
+        // price is synthetic — never let it pose as a live market price.
+        fetchedAt: chart.source === 'offline' ? null : Date.now(),
     };
 
     let rationale: string;
