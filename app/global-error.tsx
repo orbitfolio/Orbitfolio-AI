@@ -11,11 +11,11 @@ export default function GlobalError({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className="bg-[#070B14] text-white antialiased">
+      <body className="bg-base text-ink antialiased">
         <div className="mx-auto flex min-h-dvh max-w-lg flex-col justify-center px-6">
-          <p className="text-xs uppercase tracking-[0.18em] text-teal-300/80">Orbitfolio</p>
+          <p className="text-xs uppercase tracking-[0.18em] text-accent-bright/80">Orbitfolio</p>
           <h1 className="mt-2 text-2xl font-semibold">App failed to load</h1>
-          <p className="mt-2 text-sm text-slate-400">
+          <p className="mt-2 text-sm text-ink-muted">
             A root-level error occurred. Retry, or reopen the app. Demo holdings stay in
             localStorage on this device.
           </p>
@@ -25,7 +25,7 @@ export default function GlobalError({
           <button
             type="button"
             onClick={() => reset()}
-            className="mt-6 min-h-[48px] rounded-2xl bg-teal-400 text-sm font-semibold text-[#07201c]"
+            className="mt-6 min-h-[48px] rounded-2xl bg-accent text-sm font-semibold text-accent-ink"
           >
             Reload
           </button>

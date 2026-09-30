@@ -35,40 +35,45 @@ export function inferCurrency(market: 'US' | 'IN' | 'CA'): string {
     return 'USD';
 }
 
+/**
+ * Token-keyed status colors (Phase 3). These render every score badge;
+ * they resolve through the semantic palette so a future light theme only
+ * needs new CSS-variable values. Same visual output as before.
+ */
 export function labelColor(label: string): string {
     switch (label) {
         case 'Robust':
-            return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
+            return 'text-positive bg-positive/10 border-positive/20';
         case 'Constructive':
-            return 'text-teal-300 bg-teal-300/10 border-teal-300/20';
+            return 'text-accent-bright bg-accent-bright/10 border-accent-bright/20';
         case 'Mixed':
-            return 'text-slate-300 bg-white/5 border-white/10';
+            return 'text-ink-secondary bg-line/5 border-line/10';
         case 'Cautious':
-            return 'text-amber-300 bg-amber-400/10 border-amber-400/20';
+            return 'text-warning bg-warning/10 border-warning/20';
         case 'Fragile':
-            return 'text-rose-400 bg-rose-400/10 border-rose-400/20';
+            return 'text-negative bg-negative/10 border-negative/20';
         default:
-            return 'text-slate-300 bg-white/5 border-white/10';
+            return 'text-ink-secondary bg-line/5 border-line/10';
     }
 }
 
 export function healthColor(grade: string): string {
-    if (grade.startsWith('A')) return 'text-emerald-400';
-    if (grade === 'B') return 'text-teal-300';
-    if (grade === 'C') return 'text-slate-200';
-    if (grade === 'D') return 'text-amber-300';
-    return 'text-rose-400';
+    if (grade.startsWith('A')) return 'text-positive';
+    if (grade === 'B') return 'text-accent-bright';
+    if (grade === 'C') return 'text-ink-soft';
+    if (grade === 'D') return 'text-warning';
+    return 'text-negative';
 }
 
 export function actionColor(action: string): string {
     switch (action) {
         case 'Buy':
-            return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
+            return 'text-positive bg-positive/10 border-positive/20';
         case 'Hold':
-            return 'text-amber-300 bg-amber-400/10 border-amber-400/20';
+            return 'text-warning bg-warning/10 border-warning/20';
         case 'Sell':
-            return 'text-rose-400 bg-rose-400/10 border-rose-400/20';
+            return 'text-negative bg-negative/10 border-negative/20';
         default:
-            return 'text-slate-300 bg-white/5 border-white/10';
+            return 'text-ink-secondary bg-line/5 border-line/10';
     }
 }

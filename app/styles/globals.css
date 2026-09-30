@@ -2,6 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Semantic color tokens (Phase 3, Part B4).
+ *
+ * Values are RGB channel triplets so Tailwind can apply alpha
+ * (rgb(var(--c-x) / <alpha-value>) in tailwind.config.ts).
+ * Dark is the only theme right now: identical values on :root and .dark
+ * keep rendering exactly as before while darkMode: 'class' gains a real
+ * token layer to drive. The light theme lands in a later phase.
+ */
+:root,
+.dark {
+  /* Surfaces */
+  --c-base: 7 11 20; /* app background  #070B14 */
+  --c-card: 16 24 39; /* raised card     #101827 */
+  --c-sunken: 7 11 20; /* inputs inside cards */
+
+  /* Hairlines (use with /alpha, e.g. border-line/[0.08]) */
+  --c-line: 255 255 255;
+
+  /* Text tiers */
+  --c-ink: 255 255 255; /* primary   (was text-white) */
+  --c-ink-soft: 226 232 240; /*           (was slate-200) */
+  --c-ink-secondary: 203 213 225; /*       (was slate-300) */
+  --c-ink-muted: 148 163 184; /*           (was slate-400) */
+  --c-ink-faint: 100 116 139; /*           (was slate-500) */
+
+  /* Accent (teal) */
+  --c-accent: 45 212 191; /* #2DD4BF filled actions, logo */
+  --c-accent-ink: 7 32 28; /* text on accent  #07201c */
+  --c-accent-bright: 94 234 212; /* teal-300 text/borders on dark */
+
+  /* Status */
+  --c-positive: 52 211 153; /* emerald-400 */
+  --c-warning: 252 211 77; /* amber-300  */
+  --c-negative: 251 113 133; /* rose-400   */
+}
+
 * {
   @apply box-border;
 }
@@ -11,12 +48,12 @@ html {
 }
 
 body {
-  @apply bg-[#070B14] text-white;
+  @apply bg-base text-ink;
   font-feature-settings: "rlig" 1, "calt" 1, "tnum" 1;
 }
 
 a {
-  @apply text-teal-300;
+  @apply text-accent-bright;
 }
 
 button {
@@ -25,10 +62,6 @@ button {
 
 html {
   scroll-behavior: smooth;
-}
-
-.bg-orbit {
-  background: #070B14;
 }
 
 .tabular-nums {
@@ -40,9 +73,9 @@ html {
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-[#070B14];
+  @apply bg-base;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-slate-700 rounded-full;
+  @apply bg-ink-faint rounded-full;
 }
