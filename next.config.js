@@ -75,6 +75,10 @@ const nextConfig = {
         headers: [publicCache],
       },
       {
+        source: '/api/news',
+        headers: [publicCache],
+      },
+      {
         source: '/api/search',
         headers: [publicCache],
       },

@@ -6,6 +6,7 @@ import AppShell from '@/app/components/AppShell';
 import GuidanceBadge from '@/app/components/GuidanceBadge';
 import Card from '@/app/components/Card';
 import ScoreBreakdown from '@/app/components/ScoreBreakdown';
+import NewsFeed from '@/app/components/NewsFeed';
 import { formatMoney } from '@/lib/format';
 import { actionFromScore } from '@/lib/market/rating';
 import { useHoldingsStore, type AnalysisView } from '@/lib/store/holdings';
@@ -119,6 +120,8 @@ function AnalysisSymbolBody({ symbol }: { symbol: string }) {
             technical={view?.technicals ?? null}
             fundamentals={view?.fundamentals ?? null}
           />
+
+          <NewsFeed symbol={symbol} />
 
           <section className="mt-4 rounded-2xl border border-warning/20 bg-warning/[0.06] p-4">
             <p className="text-xs font-semibold uppercase tracking-wide text-warning">
