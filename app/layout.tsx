@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import { NO_FLASH_SCRIPT } from '@/lib/theme';
 import './styles/globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -32,7 +33,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#070B14',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#F6F8FB' },
+    { media: '(prefers-color-scheme: dark)', color: '#070B14' },
+  ],
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
@@ -44,7 +48,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: NO_FLASH_SCRIPT }} />
+      </head>
       <body className={`${inter.className} bg-base text-ink antialiased`}>
         {children}
         <Analytics />

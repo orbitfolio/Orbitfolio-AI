@@ -110,7 +110,7 @@ export default function AddHoldingSheet({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg rounded-t-3xl border border-line/[0.08] bg-card p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
+        className="w-full max-w-app rounded-t-3xl border border-line/[0.08] bg-card p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-line/20" />

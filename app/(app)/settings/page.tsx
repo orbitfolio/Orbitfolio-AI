@@ -4,6 +4,8 @@ import { useRef, useState } from 'react';
 import AppShell from '@/app/components/AppShell';
 import InstallPrompt from '@/app/components/InstallPrompt';
 import Card from '@/app/components/Card';
+import ThemeToggle from '@/app/components/ThemeToggle';
+import { useThemeStore } from '@/lib/theme-store';
 import { parseHoldingsJson, serializeHoldingsJson } from '@/lib/holdings/json';
 import { useHoldingsStore } from '@/lib/store/holdings';
 
@@ -55,6 +57,8 @@ export default function SettingsPage() {
     setIoNote('Holdings cleared on this device.');
   };
 
+  const themeChoice = useThemeStore((s) => s.choice);
+
   return (
     <AppShell title="Settings">
       <Card>
@@ -102,7 +106,20 @@ export default function SettingsPage() {
           className="hidden"
           onChange={(e) => void onImportFile(e.target.files?.[0])}
         />
-        {ioNote ? <p className="mt-3 text-xs text-teal-200">{ioNote}</p> : null}
+        {ioNote ? <p className="mt-3 text-xs text-accent-bright">{ioNote}</p> : null}
+      </Card>
+
+      <Card className="mt-4">
+        <p className="mb-2 text-xs uppercase tracking-wide text-ink-muted">Theme</p>
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-sm text-ink-secondary">
+            {themeChoice === 'system' ? 'Matching your system' : themeChoice === 'light' ? 'Light' : 'Dark'}
+          </p>
+          <ThemeToggle />
+        </div>
+        <p className="mt-2 text-xs text-ink-faint">
+          System follows your device appearance. Saved on this device.
+        </p>
       </Card>
 
       <Card className="mt-4">
@@ -115,7 +132,7 @@ export default function SettingsPage() {
               onClick={() => setDisplayCurrency(c)}
               className={`min-h-[44px] rounded-xl border text-sm ${
                 displayCurrency === c
-                  ? 'border-accent bg-accent/10 text-teal-200'
+                  ? 'border-accent bg-accent/10 text-accent-bright'
                   : 'border-line/10 text-ink-secondary'
               }`}
             >

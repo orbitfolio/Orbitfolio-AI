@@ -16,6 +16,17 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      /**
+       * App container: phone width below md (unchanged behavior), wider
+       * reading column on desktop. A widening, not a new architecture.
+       */
+      maxWidth: {
+        app: '32rem',
+      },
+      screens: {
+        md: '768px',
+        lg: '1200px',
+      },
       colors: {
         base: rgb('base'),
         card: rgb('card'),

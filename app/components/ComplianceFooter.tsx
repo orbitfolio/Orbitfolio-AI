@@ -33,14 +33,13 @@ const ComplianceFooter = () => {
       </div>
 
       <style jsx>{`
-        /* One-off neutrals (pre-token-layer). Intentionally untouched in the
-         * Phase 3 refactor: converting them would change rendered pixels.
-         * Fold into the semantic tokens when the light theme lands. */
+        /* Colors resolve through the semantic tokens so this footer follows
+         * the active theme (was one-off dark-only neutrals). */
         .compliance-footer {
-          background: var(--bg-dark, #0a0a0a);
-          color: var(--text-muted, #a0a0a0);
+          background: rgb(var(--c-card));
+          color: rgb(var(--c-ink-muted));
           padding: 4rem 2rem 2rem;
-          border-top: 1px solid var(--border-color, #333);
+          border-top: 1px solid rgb(var(--c-line) / 0.1);
           font-family: 'Inter', sans-serif;
           margin-top: auto;
         }
@@ -57,8 +56,8 @@ const ComplianceFooter = () => {
         .logo-text {
           font-size: 1.5rem;
           font-weight: 800;
-          color: #fff;
-          background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+          color: rgb(var(--c-accent-bright));
+          background: linear-gradient(135deg, rgb(var(--c-accent)) 0%, rgb(var(--c-accent-bright)) 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           margin-bottom: 0.5rem;
@@ -69,7 +68,7 @@ const ComplianceFooter = () => {
         }
         .disclaimer-title {
           font-weight: 700;
-          color: #fff;
+          color: rgb(var(--c-ink));
           margin-bottom: 1rem;
           text-transform: uppercase;
           letter-spacing: 0.05em;
@@ -78,14 +77,14 @@ const ComplianceFooter = () => {
         .disclaimer-text {
           font-size: 0.85rem;
           line-height: 1.6;
-          color: #888;
+          color: rgb(var(--c-ink-muted));
         }
         .footer-bottom {
           display: flex;
           justify-content: space-between;
           align-items: center;
           padding-top: 2rem;
-          border-top: 1px solid #222;
+          border-top: 1px solid rgb(var(--c-line) / 0.12);
           font-size: 0.8rem;
         }
         .footer-links {
@@ -98,7 +97,7 @@ const ComplianceFooter = () => {
           transition: color 0.2s;
         }
         .footer-links a:hover {
-          color: #fff;
+          color: rgb(var(--c-ink));
         }
         @media (max-width: 768px) {
           .footer-grid {
