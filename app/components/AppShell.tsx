@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import OrbitMark from './OrbitMark';
 import CompactDisclaimer from './CompactDisclaimer';
+import ThemeToggle from './ThemeToggle';
 
 function DashboardIcon() {
   return (
@@ -58,18 +59,21 @@ export default function AppShell({
   const settingsActive = pathname === '/settings' || pathname.startsWith('/settings/');
 
   return (
-    <div className="relative mx-auto flex min-h-dvh max-w-lg flex-col bg-base">
-      <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-line/[0.08] bg-base/90 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur">
+    <div className="relative mx-auto flex min-h-dvh max-w-app px-3 text-ink sm:px-4 lg:max-w-6xl lg:px-8">
+      <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-line/[0.08] bg-base/90 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur lg:px-2">
         <OrbitMark className="h-7 w-7 shrink-0" />
         <div className="min-w-0 flex-1">
           <p className="text-[11px] uppercase tracking-[0.18em] text-accent-bright/80">Orbitfolio</p>
           <h1 className="truncate text-lg font-semibold text-ink">{title}</h1>
         </div>
-        {action}
+        <div className="flex shrink-0 items-center gap-2">
+          {action}
+          <ThemeToggle />
+        </div>
       </header>
-      <main className="flex-1 px-4 py-4 pb-40">{children}</main>
+      <main className="flex-1 py-4 pb-40">{children}</main>
       <footer className="pointer-events-none fixed inset-x-0 bottom-0 z-30">
-        <div className="pointer-events-auto mx-auto max-w-lg border-t border-line/[0.08] bg-base/95 pb-[max(0.4rem,env(safe-area-inset-bottom))] backdrop-blur">
+        <div className="pointer-events-auto mx-auto max-w-app border-t border-line/[0.08] bg-base/95 pb-[max(0.4rem,env(safe-area-inset-bottom))] backdrop-blur lg:max-w-6xl">
           <CompactDisclaimer />
           <nav
             aria-label="Primary"

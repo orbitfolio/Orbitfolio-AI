@@ -11,7 +11,7 @@ export default function LegalPage({
 }) {
   return (
     <div className="flex min-h-dvh flex-col bg-base text-ink">
-      <main className="mx-auto flex w-full max-w-lg flex-1 flex-col px-6 pb-10 pt-[max(2rem,env(safe-area-inset-top))]">
+      <main className="mx-auto flex w-full max-w-app lg:max-w-4xl flex-1 flex-col px-6 pb-10 pt-[max(2rem,env(safe-area-inset-top))]">
         <Link href="/" className="flex items-center gap-3 no-underline">
           <OrbitMark className="h-8 w-8" />
           <span className="text-sm uppercase tracking-[0.2em] text-accent-bright">Orbitfolio</span>

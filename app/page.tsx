@@ -7,7 +7,7 @@ import Card from '@/app/components/Card';
 export default function Page() {
   return (
     <div className="flex min-h-dvh flex-col bg-base text-ink">
-      <main className="mx-auto flex w-full max-w-lg flex-1 flex-col px-6 pb-10 pt-[max(2rem,env(safe-area-inset-top))]">
+      <main className="mx-auto flex w-full max-w-app lg:max-w-5xl flex-1 flex-col px-6 pb-10 pt-[max(2rem,env(safe-area-inset-top))]">
         <div className="flex items-center gap-3">
           <OrbitMark className="h-10 w-10" />
           <span className="text-sm uppercase tracking-[0.2em] text-accent-bright">Orbitfolio</span>
@@ -23,7 +23,7 @@ export default function Page() {
           {['Technicals', 'Fundamentals', 'Analyst consensus'].map((chip) => (
             <span
               key={chip}
-              className="rounded-full border border-line/10 bg-card px-3 py-1.5 text-xs text-teal-200"
+              className="rounded-full border border-line/10 bg-card px-3 py-1.5 text-xs text-accent-bright"
             >
               {chip}
             </span>

@@ -3,15 +3,42 @@
 @tailwind utilities;
 
 /*
- * Semantic color tokens (Phase 3, Part B4).
+ * Semantic color tokens (Part B5).
  *
  * Values are RGB channel triplets so Tailwind can apply alpha
  * (rgb(var(--c-x) / <alpha-value>) in tailwind.config.ts).
- * Dark is the only theme right now: identical values on :root and .dark
- * keep rendering exactly as before while darkMode: 'class' gains a real
- * token layer to drive. The light theme lands in a later phase.
+ * :root carries the LIGHT palette (the default when no .dark class is
+ * present); .dark overrides it. The no-flash script in lib/theme.ts sets
+ * the class + color-scheme before first paint; 'system' follows
+ * prefers-color-scheme.
  */
-:root,
+:root {
+  /* Surfaces */
+  --c-base: 246 248 251; /* app background  #F6F8FB */
+  --c-card: 255 255 255; /* raised card     #FFFFFF */
+  --c-sunken: 243 246 250; /* inputs inside cards #F3F6FA */
+
+  /* Hairlines (use with /alpha, e.g. border-line/[0.08]) */
+  --c-line: 15 32 54;
+
+  /* Text tiers — warm charcoal ramp on light */
+  --c-ink: 15 23 42; /* primary   (slate-900) */
+  --c-ink-soft: 30 41 59; /*           (slate-800) */
+  --c-ink-secondary: 51 65 85; /*       (slate-700) */
+  --c-ink-muted: 100 116 139; /*           (slate-500) */
+  --c-ink-faint: 148 163 184; /*           (slate-400) */
+
+  /* Accent (teal). Ink flips to white-on-teal for light-mode contrast. */
+  --c-accent: 13 148 136; /* teal-600 filled actions */
+  --c-accent-ink: 255 255 255; /* text on accent */
+  --c-accent-bright: 15 118 110; /* teal-700 text/borders on light */
+
+  /* Status */
+  --c-positive: 5 150 105; /* emerald-600 */
+  --c-warning: 180 83 9; /* amber-700  */
+  --c-negative: 225 29 72; /* rose-600   */
+}
+
 .dark {
   /* Surfaces */
   --c-base: 7 11 20; /* app background  #070B14 */
@@ -44,7 +71,7 @@
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: light dark;
 }
 
 body {

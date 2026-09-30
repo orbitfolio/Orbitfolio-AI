@@ -38,7 +38,7 @@ export default function DashboardPage() {
     let value = 0;
     let cost = 0;
     let day = 0;
-    const byMarket: Record<string, number> = { US: 0, IN: 0, CA: 0 };
+    const byMarket: Record<string, number> = {};
     for (const h of holdings) {
       const q = quotes[h.symbol];
       const px = q?.price ?? h.averagePrice;
@@ -64,6 +64,23 @@ export default function DashboardPage() {
     if (!scores.length) return null;
     return Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 10) / 10;
   }, [holdings, analyses]);
+
+  /**
+   * Allocation segments for any market, largest first. Token color cycle:
+   * accent → warning → positive → card-looping neutrals. Deliberately no
+   * red — a red slice would read as a loss, which allocation is not.
+   */
+  const allocationSegments = useMemo(() => {
+    const cycle = ['bg-accent-bright', 'bg-warning', 'bg-positive', 'bg-ink-faint'];
+    return Object.entries(stats.byMarket)
+      .filter(([, v]) => v > 0)
+      .sort((a, b) => b[1] - a[1])
+      .map(([market, v], i) => ({
+        market,
+        pct: stats.value ? (v / stats.value) * 100 : 0,
+        color: cycle[i % cycle.length],
+      }));
+  }, [stats.byMarket, stats.value]);
 
   const quotesReady = Object.keys(quotes).length > 0;
   const progressLabel =
@@ -163,16 +180,15 @@ export default function DashboardPage() {
       <Card className="mt-4">
         <p className="mb-3 text-xs uppercase tracking-wide text-ink-muted">Allocation</p>
         <div className="flex h-2 overflow-hidden rounded-full bg-line/5">
-          {(['US', 'IN', 'CA'] as const).map((m) => {
-            const pct = stats.value ? (stats.byMarket[m] / stats.value) * 100 : 0;
-            const colors = { US: 'bg-accent-bright', IN: 'bg-warning', CA: 'bg-sky-400' };
-            return <div key={m} className={colors[m]} style={{ width: `${pct}%` }} />;
-          })}
+          {allocationSegments.map((s) => (
+            <div key={s.market} className={s.color} style={{ width: `${s.pct}%` }} />
+          ))}
         </div>
-        <div className="mt-2 flex justify-between text-[11px] text-ink-muted">
-          {(['US', 'IN', 'CA'] as const).map((m) => (
-            <span key={m}>
-              {m} {stats.value ? ((stats.byMarket[m] / stats.value) * 100).toFixed(0) : 0}%
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-ink-muted">
+          {allocationSegments.map((s) => (
+            <span key={s.market} className="inline-flex items-center gap-1">
+              <span className={`inline-block h-1.5 w-1.5 rounded-full ${s.color}`} />
+              {s.market} {s.pct.toFixed(0)}%
             </span>
           ))}
         </div>

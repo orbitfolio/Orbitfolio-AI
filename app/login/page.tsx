@@ -11,7 +11,7 @@ const hasSupabase = Boolean(
 export default function LoginPage() {
   return (
     <div className="flex min-h-dvh flex-col bg-base">
-      <main className="mx-auto flex w-full max-w-lg flex-1 flex-col justify-center px-6 py-10">
+      <main className="mx-auto flex w-full max-w-app lg:max-w-5xl flex-1 flex-col justify-center px-6 py-10">
         <OrbitMark className="h-12 w-12" />
         <h1 className="mt-4 text-3xl font-semibold text-ink">Orbitfolio</h1>
         <p className="mt-2 text-sm text-ink-muted">

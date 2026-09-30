@@ -3,7 +3,7 @@ import OrbitMark from '@/app/components/OrbitMark';
 
 export default function NotFound() {
   return (
-    <div className="mx-auto flex min-h-dvh max-w-lg flex-col justify-center bg-base px-6 text-ink">
+    <div className="mx-auto flex min-h-dvh max-w-app flex-col justify-center bg-base px-6 text-ink">
       <OrbitMark className="h-10 w-10" />
       <h1 className="mt-6 text-3xl font-semibold">Page not found</h1>
       <p className="mt-3 text-sm text-ink-muted">

@@ -38,7 +38,7 @@ export default function ImportCsvSheet({ open, onClose }: { open: boolean; onClo
   return (
     <div className="fixed inset-0 z-40 flex items-end bg-black/60" onClick={close}>
       <div
-        className="w-full max-w-lg rounded-t-3xl border border-line/[0.08] bg-card p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
+        className="w-full max-w-app rounded-t-3xl border border-line/[0.08] bg-card p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-line/20" />
@@ -46,7 +46,7 @@ export default function ImportCsvSheet({ open, onClose }: { open: boolean; onClo
         <p className="mb-3 text-xs text-ink-muted">
           Columns: ticker, quantity, cost_price, asset_type (optional). Aliases: symbol, qty, avg.
         </p>
-        <label className="flex min-h-[48px] items-center justify-center rounded-xl border border-dashed border-line/20 text-sm text-teal-200">
+        <label className="flex min-h-[48px] items-center justify-center rounded-xl border border-dashed border-line/20 text-sm text-accent-bright">
           {fileName || 'Choose CSV file'}
           <input
             type="file"

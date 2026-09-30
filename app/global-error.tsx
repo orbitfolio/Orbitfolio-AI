@@ -12,7 +12,7 @@ export default function GlobalError({
   return (
     <html lang="en" className="dark">
       <body className="bg-base text-ink antialiased">
-        <div className="mx-auto flex min-h-dvh max-w-lg flex-col justify-center px-6">
+        <div className="mx-auto flex min-h-dvh max-w-app flex-col justify-center px-6">
           <p className="text-xs uppercase tracking-[0.18em] text-accent-bright/80">Orbitfolio</p>
           <h1 className="mt-2 text-2xl font-semibold">App failed to load</h1>
           <p className="mt-2 text-sm text-ink-muted">
@@ -20,7 +20,7 @@ export default function GlobalError({
             localStorage on this device.
           </p>
           {error.digest ? (
-            <p className="mt-2 text-xs text-slate-600">Reference {error.digest}</p>
+            <p className="mt-2 text-xs text-ink-faint">Reference {error.digest}</p>
           ) : null}
           <button
             type="button"
