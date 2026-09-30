@@ -56,6 +56,10 @@ export interface HoldingAnalysisView {
         adx14: number | null;
         volumeRatio: number | null;
         week52HighRatio: number | null;
+        week52Range?: number | null;
+        realizedVol?: number | null;
+        maxDrawdown?: number | null;
+        relMomentum?: number | null;
         components?: Record<string, number | null>;
         weightsUsed?: Record<string, number>;
     };
@@ -76,6 +80,7 @@ export interface HoldingAnalysisView {
         cashConversion?: number | null;
         fcfConversion?: number | null;
         accrualsCheck?: number | null;
+        dividendSustainability?: number | null;
         enterpriseToEbitda: number | null;
         earningsGrowth: number | null;
         revenueGrowth: number | null;
@@ -208,13 +213,32 @@ async function persistAnalysis(sym: string, view: HoldingAnalysisView): Promise<
     if (view.quote) await rememberQuote(sym, view.quote);
 }
 
+/**
+ * Benchmark for relative momentum (A2): the stock's home-market index.
+ * fetchChart is per-symbol cached and in-flight coalesced, so all popular
+ * tickers on one market share a single benchmark fetch per cache window.
+ */
+function benchmarkSymbolFor(sym: string): string {
+    if (sym.endsWith('.NS') || sym.endsWith('.BO')) return '^NSEI';
+    if (sym.endsWith('.TO') || sym.endsWith('.V')) return '^GSPTSE';
+    return '^GSPC';
+}
+
 async function buildViewFromChart(
     sym: string,
     chart: ChartResult,
     summary: QuoteSummaryBits | null,
     opts: { skipGroq?: boolean; rationalePrefix?: string; source?: string; stale?: boolean }
 ): Promise<HoldingAnalysisView> {
-    const technicals = computeTechnicals(chart.bars);
+    // One extra cached fetch for the benchmark; failures degrade to absolute
+    // momentum only (relMomentum component drops out, weights renormalize).
+    const benchmarkCloses = await fetchChart(benchmarkSymbolFor(sym), '1y', '1d')
+        .then((b) => b.bars.map((bar) => bar.close))
+        .catch((err) => {
+            console.warn('[analyze] benchmark chart failed', sym, err instanceof Error ? err.message : 'error');
+            return null as number[] | null;
+        });
+    const technicals = computeTechnicals(chart.bars, { benchmarkCloses });
     const fundamentals = computeFundamentals({
         trailingPE: summary?.trailingPE,
         forwardPE: summary?.forwardPE,
@@ -233,6 +257,7 @@ async function buildViewFromChart(
         marketCap: summary?.marketCap,
         earningsGrowth: summary?.earningsGrowth,
         revenueGrowth: summary?.revenueGrowth,
+        payoutRatio: summary?.payoutRatio,
         name: summary?.shortName || summary?.longName || chart.quote.name,
         quoteType: summary?.quoteType,
         symbol: sym,
@@ -367,6 +392,10 @@ async function buildViewFromChart(
             adx14: technicals.adx14,
             volumeRatio: technicals.volumeRatio,
             week52HighRatio: technicals.week52HighRatio,
+            week52Range: technicals.week52Range,
+            realizedVol: technicals.realizedVol,
+            maxDrawdown: technicals.maxDrawdown,
+            relMomentum: technicals.relMomentum,
             components: technicals.components,
             weightsUsed: technicals.weightsUsed,
         },
@@ -387,6 +416,7 @@ async function buildViewFromChart(
             cashConversion: fundamentals.cashConversion,
             fcfConversion: fundamentals.fcfConversion,
             accrualsCheck: fundamentals.accrualsCheck,
+            dividendSustainability: fundamentals.dividendSustainability,
             enterpriseToEbitda: fundamentals.enterpriseToEbitda,
             earningsGrowth: fundamentals.earningsGrowth,
             revenueGrowth: fundamentals.revenueGrowth,

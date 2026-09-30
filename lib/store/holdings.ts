@@ -83,6 +83,7 @@ export interface AnalysisView {
         cashConversion?: number | null;
         fcfConversion?: number | null;
         accrualsCheck?: number | null;
+        dividendSustainability?: number | null;
         enterpriseToEbitda?: number | null;
         earningsGrowth?: number | null;
         revenueGrowth?: number | null;
