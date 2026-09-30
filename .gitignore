@@ -19,6 +19,7 @@ data/embeddings/
 
 # Local comparison/temp artifacts
 .tmp-seed-check/
+.tmp-score-audit/
 of-cmp-run/
 tmp-cmp/
 scripts/lib/

@@ -73,6 +73,9 @@ export interface HoldingAnalysisView {
         freeCashflow: number | null;
         operatingCashflow: number | null;
         fcfYield: number | null;
+        cashConversion?: number | null;
+        fcfConversion?: number | null;
+        accrualsCheck?: number | null;
         enterpriseToEbitda: number | null;
         earningsGrowth: number | null;
         revenueGrowth: number | null;
@@ -381,6 +384,9 @@ async function buildViewFromChart(
             freeCashflow: fundamentals.freeCashflow,
             operatingCashflow: fundamentals.operatingCashflow,
             fcfYield: fundamentals.fcfYield,
+            cashConversion: fundamentals.cashConversion,
+            fcfConversion: fundamentals.fcfConversion,
+            accrualsCheck: fundamentals.accrualsCheck,
             enterpriseToEbitda: fundamentals.enterpriseToEbitda,
             earningsGrowth: fundamentals.earningsGrowth,
             revenueGrowth: fundamentals.revenueGrowth,

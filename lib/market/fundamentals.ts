@@ -49,6 +49,12 @@ export interface FundamentalSnapshot {
     freeCashflow: number | null;
     operatingCashflow: number | null;
     fcfYield: number | null;
+    /** Operating cash flow / net income (only when net income > 0). */
+    cashConversion: number | null;
+    /** Free cash flow / operating cash flow: how much cash survives capex. */
+    fcfConversion: number | null;
+    /** Scaled accruals (NI - OCF) / mean(|NI|,|OCF|) in [-2, 2]; <= 0 is conservative. */
+    accrualsCheck: number | null;
     enterpriseToEbitda: number | null;
     earningsGrowth: number | null;
     revenueGrowth: number | null;
@@ -158,6 +164,37 @@ function scoreFcfYield(y: number): number {
     return 4.5;
 }
 
+/**
+ * A1 cash quality (Phase 2). Graded replacements for the old binary
+ * OCF>=NI accrual check, per the quality-factor literature: profits not
+ * backed by cash are the most reliable earnings-quality warning sign.
+ */
+function scoreCashConversion(cc: number): number {
+    if (cc >= 1.2) return 9;
+    if (cc >= 1.0) return 7.5;
+    if (cc >= 0.8) return 6;
+    if (cc >= 0.5) return 4;
+    if (cc > 0) return 2;
+    return 1.5; // burns cash while reporting profit
+}
+
+function scoreFcfConversion(fc: number): number {
+    if (fc >= 0.9) return 9;
+    if (fc >= 0.6) return 7.5;
+    if (fc >= 0.3) return 5.5;
+    if (fc >= 0) return 4;
+    return 2; // profits consume cash after capex
+}
+
+/** Scaled accruals without total assets: (NI - OCF) / mean(|NI|, |OCF|), bounded [-2, 2]. */
+function scoreAccruals(accRatio: number): number {
+    if (accRatio <= -0.2) return 9; // cash runs ahead of reported profit
+    if (accRatio <= 0) return 7.5;
+    if (accRatio <= 0.2) return 6;
+    if (accRatio <= 0.5) return 4;
+    return 2;
+}
+
 function scoreGrowth(g: number): number {
     const pct = asPct(g);
     if (pct >= 20) return 9;
@@ -264,14 +301,34 @@ export function computeFundamentals(input: FundamentalInputs): FundamentalSnapsh
     const profitabilityScore = mean(profitParts);
 
     // --- Cash 15% ---
+    // A1: graded cash quality. cashConversion needs positive net income to be
+    // meaningful; accruals (scaled) covers the loss-making case; fcfConversion
+    // needs positive operating cash flow so the ratio keeps its meaning.
     const cashParts: number[] = [];
+    let cashConversion: number | null = null;
+    let fcfConversion: number | null = null;
+    let accrualsCheck: number | null = null;
     if (fcfYield != null) {
         cashParts.push(scoreFcfYield(fcfYield));
         used.push('fcfYield');
     }
     if (operatingCashflow != null && netIncomeToCommon != null) {
-        cashParts.push(operatingCashflow >= netIncomeToCommon ? 8 : 4);
-        used.push('accrual');
+        if (netIncomeToCommon > 0) {
+            cashConversion = operatingCashflow / netIncomeToCommon;
+            cashParts.push(scoreCashConversion(cashConversion));
+            used.push('cashConversion');
+        }
+        const accrualScale = (Math.abs(netIncomeToCommon) + Math.abs(operatingCashflow)) / 2;
+        if (accrualScale > 0) {
+            accrualsCheck = (netIncomeToCommon - operatingCashflow) / accrualScale;
+            cashParts.push(scoreAccruals(accrualsCheck));
+            used.push('accruals');
+        }
+    }
+    if (operatingCashflow != null && operatingCashflow > 0 && freeCashflow != null) {
+        fcfConversion = freeCashflow / operatingCashflow;
+        cashParts.push(scoreFcfConversion(fcfConversion));
+        used.push('fcfConversion');
     }
     const cashScore = mean(cashParts);
 
@@ -341,6 +398,9 @@ export function computeFundamentals(input: FundamentalInputs): FundamentalSnapsh
         freeCashflow,
         operatingCashflow,
         fcfYield: fcfYield != null ? Math.round(fcfYield * 10000) / 10000 : null,
+        cashConversion: cashConversion != null ? Math.round(cashConversion * 100) / 100 : null,
+        fcfConversion: fcfConversion != null ? Math.round(fcfConversion * 100) / 100 : null,
+        accrualsCheck: accrualsCheck != null ? Math.round(accrualsCheck * 100) / 100 : null,
         enterpriseToEbitda,
         earningsGrowth,
         revenueGrowth,
