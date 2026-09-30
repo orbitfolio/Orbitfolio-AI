@@ -36,6 +36,8 @@ export interface YahooQuote {
     marketState: string;
     fiftyTwoWeekHigh: number | null;
     fiftyTwoWeekLow: number | null;
+    /** When this price was actually fetched (epoch ms); preserved through stale-cache serving. */
+    fetchedAt?: number | null;
 }
 
 export interface YahooSearchResult {
@@ -604,7 +606,7 @@ export async function fetchQuotes(symbols: string[]): Promise<YahooQuote[]> {
         try {
             const { quote } = await fetchChart(sym, '5d', '1d');
             if (quote.price != null && Number.isFinite(quote.price)) {
-                return { ...quote, symbol: sym };
+                return { ...quote, symbol: sym, fetchedAt: Date.now() };
             }
         } catch (err) {
             console.error('[yahoo] quote failed', {

@@ -27,6 +27,8 @@ export interface QuoteView {
     currency: string;
     exchange: string;
     marketState: string;
+    /** Server fetch timestamp (epoch ms); lets the UI label quote age honestly. */
+    fetchedAt?: number | null;
 }
 
 export interface AnalysisView {
@@ -97,6 +99,9 @@ export interface AnalysisView {
     meta?: { stale?: boolean; source?: string };
 }
 
+/** Debounce for automatic quote refreshes; the server bucket is 15 min. */
+const QUOTES_REFRESH_DEBOUNCE_MS = 14 * 60 * 1000;
+
 const DEMO_SEED: Holding[] = [
     { id: 'demo-aapl', symbol: 'AAPL', name: 'Apple Inc.', quantity: 12, averagePrice: 178.5, currency: 'USD', market: 'US', assetType: 'STOCK' },
     { id: 'demo-msft', symbol: 'MSFT', name: 'Microsoft Corp.', quantity: 8, averagePrice: 390, currency: 'USD', market: 'US', assetType: 'STOCK' },
@@ -118,6 +123,10 @@ interface HoldingsState {
     fx: Record<string, number>;
     displayCurrency: 'USD' | 'INR' | 'CAD';
     healthRating: string | null;
+    /** Server timestamp of the last successful quotes fetch (client clock). */
+    quotesFetchedAt: number | null;
+    /** True when the last quotes attempt returned no usable prices. */
+    quotesFailed: boolean;
     loadingQuotes: boolean;
     loadingAnalysis: boolean;
     ratingDone: number;
@@ -129,7 +138,7 @@ interface HoldingsState {
     replaceHoldings: (next: Omit<Holding, 'id'>[] | Holding[]) => void;
     clearHoldings: () => void;
     setDisplayCurrency: (c: 'USD' | 'INR' | 'CAD') => void;
-    refreshQuotes: () => Promise<void>;
+    refreshQuotes: (opts?: { force?: boolean }) => Promise<void>;
     rateSymbol: (symbol: string) => Promise<AnalysisView | null>;
     rateAll: (force?: boolean) => Promise<void>;
 }
@@ -153,9 +162,11 @@ export const useHoldingsStore = create<HoldingsState>()(
         (set, get) => ({
             holdings: DEMO_SEED,
             seeded: true,
-            quotes: {},
-            analyses: {},
-            fx: {},
+    quotes: {},
+    quotesFetchedAt: null,
+    quotesFailed: false,
+    analyses: {},
+    fx: {},
             displayCurrency: 'USD',
             healthRating: null,
             loadingQuotes: false,
@@ -205,26 +216,39 @@ export const useHoldingsStore = create<HoldingsState>()(
                 });
             },
             setDisplayCurrency: (c) => set({ displayCurrency: c }),
-            refreshQuotes: async () => {
+            refreshQuotes: async (opts) => {
                 const symbols = get().holdings.map((h) => h.symbol);
                 if (symbols.length === 0) return;
+                // Debounce: quotes are bucketed server-side for 15 min, so re-fetching
+                // more often than this changes nothing. Retry passes with force skip it.
+                const fresh = Date.now() - (get().quotesFetchedAt ?? 0) < QUOTES_REFRESH_DEBOUNCE_MS;
+                if (fresh && !opts?.force) return;
                 set({ loadingQuotes: true });
                 try {
                     const fxSymbols = ['INR=X', 'CAD=X'];
                     const all = [...symbols, ...fxSymbols];
-                    const res = await fetch(`/api/quotes?symbols=${encodeURIComponent(all.join(','))}`);
+                    // Client-side timeout: a hung upstream must surface as a failed
+                    // fetch (retryable banner), never an unbounded skeleton.
+                    const res = await fetch(`/api/quotes?symbols=${encodeURIComponent(all.join(','))}`, {
+                        signal: AbortSignal.timeout(12_000),
+                    });
                     const json = await res.json();
-                    if (!json.success) return;
+                    if (!json.success) throw new Error(json.message ?? 'quotes unavailable');
                     const quotes: Record<string, QuoteView> = { ...get().quotes };
                     const fx: Record<string, number> = { ...get().fx };
+                    let priced = 0;
                     for (const q of json.data as QuoteView[]) {
                         if (q.symbol === 'INR=X' && q.price) fx.INR = q.price;
                         else if (q.symbol === 'CAD=X' && q.price) fx.CAD = q.price;
-                        else quotes[q.symbol] = q;
+                        else {
+                            if (q.price != null) priced += 1;
+                            quotes[q.symbol] = q;
+                        }
                     }
-                    set({ quotes, fx });
+                    set({ quotes, fx, quotesFetchedAt: Date.now(), quotesFailed: priced === 0 });
                 } catch (err) {
                     console.error('[store] quotes failed', err);
+                    set({ quotesFailed: true });
                 } finally {
                     set({ loadingQuotes: false });
                 }
@@ -232,7 +256,9 @@ export const useHoldingsStore = create<HoldingsState>()(
             rateSymbol: async (symbol) => {
                 const key = symbol.toUpperCase();
                 try {
-                    const res = await fetch(`/api/analysis?symbol=${encodeURIComponent(key)}`);
+                    const res = await fetch(`/api/analysis?symbol=${encodeURIComponent(key)}`, {
+                        signal: AbortSignal.timeout(45_000),
+                    });
                     const json = await res.json();
                     if (!json.success) return get().analyses[key] ?? null;
                     const view = {
@@ -325,6 +351,7 @@ export const useHoldingsStore = create<HoldingsState>()(
                 displayCurrency: state.displayCurrency,
                 analyses: capAnalyses(state.analyses),
                 quotes: state.quotes,
+                quotesFetchedAt: state.quotesFetchedAt,
                 healthRating: state.healthRating,
             }),
         }

@@ -24,6 +24,8 @@ const files = [
   'tests/technicals-a2.test.ts',
   'tests/news.test.ts',
   'tests/cash-quality.test.ts',
+  'tests/format.test.ts',
+  'lib/format.ts',
   'lib/market/technicals.ts',
   'lib/market/fundamentals.ts',
   'lib/market/rating.ts',
@@ -77,6 +79,7 @@ const result = spawnSync(
     path.join(outDir, 'tests/technicals-a2.test.js'),
     path.join(outDir, 'tests/news.test.js'),
     path.join(outDir, 'tests/cash-quality.test.js'),
+    path.join(outDir, 'tests/format.test.js'),
   ],
   { stdio: 'inherit', cwd: root }
 );

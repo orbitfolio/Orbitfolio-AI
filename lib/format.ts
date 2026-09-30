@@ -18,6 +18,19 @@ export function formatNumber(value: number, digits = 2): string {
     }).format(value);
 }
 
+/** Human label for a quote's age in minutes; e.g. "just now", "4 min ago", "3h ago", "2d ago". */
+export function formatQuoteAge(ms: number | null | undefined): string {
+    if (ms == null || !Number.isFinite(ms) || ms < 0) return '';
+    const minutes = Math.floor(ms / 60_000);
+    if (minutes < 1) return 'just now';
+    if (minutes < 60) return `${minutes} min ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 14) return `${days}d ago`;
+    return `${Math.floor(days / 7)}w ago`;
+}
+
 export function formatPct(value: number, digits = 2): string {
     const sign = value > 0 ? '+' : '';
     return `${sign}${value.toFixed(digits)}%`;

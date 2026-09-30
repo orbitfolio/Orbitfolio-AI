@@ -7,7 +7,8 @@ import GuidanceBadge from '@/app/components/GuidanceBadge';
 import Card from '@/app/components/Card';
 import ScoreBreakdown from '@/app/components/ScoreBreakdown';
 import NewsFeed from '@/app/components/NewsFeed';
-import { formatMoney } from '@/lib/format';
+import { formatMoney, formatQuoteAge } from '@/lib/format';
+import { useNow } from '@/lib/useNow';
 import { actionFromScore } from '@/lib/market/rating';
 import { useHoldingsStore, type AnalysisView } from '@/lib/store/holdings';
 
@@ -68,6 +69,7 @@ function AnalysisSymbolBody({ symbol }: { symbol: string }) {
 
   const g = view?.analysis.guidance;
   const q = view?.quote;
+  const now = useNow(30_000);
   const action = g ? (g.action ?? actionFromScore(g.orbitScore)) : undefined;
   const street = g?.analystRaw;
   const streetAvailable = g?.analystAvailable !== false && Boolean(street?.recommendationKey || street?.numberOfAnalysts || street?.targetMean);
@@ -107,6 +109,11 @@ function AnalysisSymbolBody({ symbol }: { symbol: string }) {
             {q?.price != null && (
               <p className="mt-2 text-sm tabular-nums text-ink-secondary">
                 {formatMoney(q.price, q.currency)}
+                {q.fetchedAt != null && now != null && (
+                  <span className="ml-2 text-[11px] text-ink-faint">
+                    as of {formatQuoteAge(now - q.fetchedAt)}
+                  </span>
+                )}
               </p>
             )}
             <p className="mt-3 text-sm leading-relaxed text-ink-secondary">{g.rationale}</p>

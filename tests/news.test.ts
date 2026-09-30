@@ -1,6 +1,13 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { parseYahooRss, newsCacheKey, NEWS_TTL_SECONDS } from '../lib/market/news';
+import {
+    parseYahooRss,
+    newsCacheKey,
+    NEWS_TTL_SECONDS,
+    resolveNewsFromFeeds,
+    yahooRssUrl,
+    googleNewsRssUrl,
+} from '../lib/market/news';
 import { PILLAR_WEIGHTS } from '../lib/market/rating';
 
 const SAMPLE = `<?xml version="1.0" encoding="UTF-8"?>
@@ -44,6 +51,47 @@ test('respects the limit', () => {
 test('garbage input yields empty array, never throws', () => {
     assert.deepEqual(parseYahooRss('not xml at all'), []);
     assert.deepEqual(parseYahooRss(''), []);
+});
+
+test('news falls back to the second feed when the first is empty or fails', async () => {
+    const yahooXml = `<rss><channel><item><title>Yahoo story</title><link>https://finance.yahoo.com/news/y1</link></item></channel></rss>`;
+    const googleXml = `<rss><channel><item><title>Google story</title><link>https://news.google.com/rss/articles/g1</link></item></channel></rss>`;
+
+    // First feed wins.
+    let calls = 0;
+    const firstOk = (async (url: string) => {
+        calls += 1;
+        return { ok: true, text: async () => (url === yahooRssUrl('AAPL') ? yahooXml : googleXml) };
+    }) as never;
+
+    const primary = await resolveNewsFromFeeds([yahooRssUrl('AAPL'), googleNewsRssUrl('AAPL')], 6, firstOk as never);
+    assert.equal(primary.length, 1);
+    assert.equal(primary[0].title, 'Yahoo story');
+    assert.equal(calls, 1); // never needed the fallback
+
+    // First feed fails (non-ok) → second serves.
+    let secondCalls = 0;
+    const yahooDown = (async (url: string) => {
+        if (url === yahooRssUrl('AAPL')) return { ok: false, text: async () => '' };
+        secondCalls += 1;
+        return { ok: true, text: async () => googleXml };
+    }) as never;
+    const viaFallback = await resolveNewsFromFeeds([yahooRssUrl('AAPL'), googleNewsRssUrl('AAPL')], 6, yahooDown as never);
+    assert.equal(viaFallback.length, 1);
+    assert.equal(viaFallback[0].title, 'Google story');
+    assert.equal(secondCalls, 1);
+
+    // First feed throws → second serves; both bad → empty, never throws.
+    const yahooThrows = (async (url: string) => {
+        if (url === yahooRssUrl('AAPL')) throw new Error('429');
+        return { ok: true, text: async () => googleXml };
+    }) as never;
+    const viaThrow = await resolveNewsFromFeeds([yahooRssUrl('AAPL'), googleNewsRssUrl('AAPL')], 6, yahooThrows as never);
+    assert.equal(viaThrow[0].title, 'Google story');
+
+    const allBad = (async () => ({ ok: false, text: async () => '' })) as never;
+    const none = await resolveNewsFromFeeds([yahooRssUrl('AAPL'), googleNewsRssUrl('AAPL')], 6, allBad as never);
+    assert.deepEqual(none, []);
 });
 
 test('cache key is bucketed and TTL is 30 minutes', () => {

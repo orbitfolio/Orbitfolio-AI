@@ -13,6 +13,11 @@ const eslintConfig = [
       "next-env.d.ts",
       "scripts/**",
       ".tmp-tests/**",
+      ".tmp-score-audit/**",
+      ".tmp-seed-check/**",
+      "of-cmp-run/**",
+      "tmp-cmp/**",
+      "data/cache/**",
     ],
   }
 ];
