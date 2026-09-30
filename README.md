@@ -6,7 +6,7 @@ Mobile-first Android PWA for tracking a demo portfolio and scoring every holding
 2. Fundamentals (available PE, PB, ROE, margins, leverage, 52-week position)
 3. Third-party analyst consensus (Yahoo recommendation trend)
 
-Public analysis may show the Orbit score (0–10), a client action of **Buy / Hold / Sell**, a short rationale, and street consensus. That is research guidance, not personalized or regulated investment advice. Portfolio health uses A+ to F as a grade, not a trade.
+Public analysis shows the Orbit score (0–10), a mechanical client action of **Buy / Hold / Sell** derived only from the score (Buy ≥ 6.5, Hold ≥ 4.0), a short rationale, and third-party street consensus. This is research guidance for clients, not personalized or regulated investment advice: it does not consider your finances, goals, tax situation, or risk tolerance. Portfolio health uses A+ to F as a grade, not a trade. Third-party analyst consensus is always attributed to its source, never presented as an Orbitfolio recommendation.
 
 v1 is a finished demo app: no login required. Holdings persist in **localStorage on this device only**. Export, import, or clear them from Settings.
 
@@ -98,7 +98,6 @@ Upstash Redis is optional and shared across users when set (UPSTASH_REDIS_REST_U
 - POST /api/analysis/portfolio with { symbols: string[] } (public, concurrency 3)
 - GET /api/health → `{ ok: true }` (no-store)
 - GET/POST /api/holdings (session required; handler checks auth)
-- GET /api/test_json (development only; 404 in production)
 
 ## Yahoo / Groq limits
 

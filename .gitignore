@@ -6,8 +6,11 @@ dist/
 build/
 .DS_Store
 *.log
-.vercel
 .env*.local
+
+# AI agent workspace (local-only)
+.agent/
+.freebuff/
 
 # AI data artifacts (don't commit cache/embeddings)
 data/cache/

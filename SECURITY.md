@@ -18,5 +18,4 @@ We aim to acknowledge private reports within 7 days.
   personal data.
 - `/api/holdings` requires a Supabase session when that stack is configured. Auth is checked in
   the route handler, not only in middleware.
-- `/api/test_json` is development-only and returns 404 in production.
 - Optional secrets (`GROQ_API_KEY`, Supabase, Upstash) belong in the host env, never in git.

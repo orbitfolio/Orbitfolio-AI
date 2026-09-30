@@ -15,4 +15,4 @@
 ## Post-Release
 - [ ] Verify production deployment
 - [ ] Run smoke tests on production URL
-- [ ] Update `master_project_history.md` with release notes
+- [ ] Update `docs/notes/master_project_history.md` with release notes

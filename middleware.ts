@@ -15,7 +15,6 @@ function isPublicApi(pathname: string): boolean {
     if (pathname.startsWith('/api/quotes')) return true;
     if (pathname.startsWith('/api/analysis')) return true;
     if (pathname.startsWith('/api/health')) return true;
-    if (pathname.startsWith('/api/test_json')) return true;
     return false;
 }
 

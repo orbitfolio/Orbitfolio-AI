@@ -98,10 +98,6 @@ const nextConfig = {
         source: '/api/health',
         headers: [{ key: 'Cache-Control', value: 'no-store' }],
       },
-      {
-        source: '/api/test_json',
-        headers: [privateNoStore],
-      },
     ];
   },
 };

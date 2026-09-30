@@ -92,10 +92,10 @@ This directory contains the comprehensive **OrbitFolio Security Framework**, doc
 
 ## Related Documentation
 
-- [Project Specification](file:///C:/Users/Bhavna/Desktop/orbitfolio/project-spec.md)
-- [Master Project History](file:///C:/Users/Bhavna/Desktop/orbitfolio/master_project_history.md)
-- [Phase 13 Changelog](file:///C:/Users/Bhavna/Desktop/orbitfolio/aiChangeLog/phase-13-enterprise-security.md)
-- [Security Assessment](file:///C:/Users/Bhavna/Desktop/orbitfolio/security_assessment.md)
+- [Project Specification](../notes/project-spec.md)
+- [Master Project History](../notes/master_project_history.md)
+- [Phase 13 Changelog](../changelog/phase-13-enterprise-security.md)
+- [Security Assessment](security_assessment.md)
 
 ---
 
