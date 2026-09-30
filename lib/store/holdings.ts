@@ -80,6 +80,9 @@ export interface AnalysisView {
         freeCashflow?: number | null;
         operatingCashflow?: number | null;
         fcfYield?: number | null;
+        cashConversion?: number | null;
+        fcfConversion?: number | null;
+        accrualsCheck?: number | null;
         enterpriseToEbitda?: number | null;
         earningsGrowth?: number | null;
         revenueGrowth?: number | null;
