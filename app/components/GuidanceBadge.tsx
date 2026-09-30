@@ -17,8 +17,8 @@ export default function GuidanceBadge({
   if (!label && !resolved) {
     return (
       <span role="status" className="inline-flex flex-col items-end gap-0.5">
-        <span className="text-[9px] uppercase tracking-[0.14em] text-slate-500">Action</span>
-        <span className="inline-flex items-center rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-xs text-slate-400">
+        <span className="text-[9px] uppercase tracking-[0.14em] text-ink-faint">Action</span>
+        <span className="inline-flex items-center rounded-md border border-line/10 bg-line/5 px-2 py-0.5 text-xs text-ink-muted">
           Unrated
         </span>
       </span>
@@ -27,7 +27,7 @@ export default function GuidanceBadge({
 
   return (
     <span role="status" className="inline-flex flex-col items-end gap-0.5">
-      <span className="text-[9px] uppercase tracking-[0.14em] text-slate-500">Action</span>
+      <span className="text-[9px] uppercase tracking-[0.14em] text-ink-faint">Action</span>
       {resolved ? (
         <span
           className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-sm font-semibold tabular-nums ${actionColor(resolved)}`}

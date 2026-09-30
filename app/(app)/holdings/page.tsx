@@ -6,6 +6,7 @@ import AppShell from '@/app/components/AppShell';
 import AddHoldingSheet from '@/app/components/AddHoldingSheet';
 import ImportCsvSheet from '@/app/components/ImportCsvSheet';
 import GuidanceBadge from '@/app/components/GuidanceBadge';
+import Card, { cardClass } from '@/app/components/Card';
 import { formatMoney, formatNumber } from '@/lib/format';
 import { HOLDINGS_CSV_TEMPLATE } from '@/lib/holdings/csv';
 import { useHoldingsStore, type Holding } from '@/lib/store/holdings';
@@ -35,7 +36,7 @@ export default function HoldingsPage() {
         <button
           type="button"
           onClick={() => setCsvOpen(true)}
-          className="min-h-[44px] rounded-xl border border-white/15 text-sm font-semibold text-slate-200"
+          className="min-h-[44px] rounded-xl border border-line/15 text-sm font-semibold text-ink-soft"
         >
           Import CSV
         </button>
@@ -45,7 +46,7 @@ export default function HoldingsPage() {
             setEditing(null);
             setOpen(true);
           }}
-          className="min-h-[44px] rounded-xl bg-teal-400 text-sm font-semibold text-[#07201c]"
+          className="min-h-[44px] rounded-xl bg-accent text-sm font-semibold text-accent-ink"
         >
           Add
         </button>
@@ -53,20 +54,20 @@ export default function HoldingsPage() {
       <button
         type="button"
         onClick={downloadTemplate}
-        className="mb-4 text-left text-xs text-teal-300 underline-offset-2 hover:underline"
+        className="mb-4 text-left text-xs text-accent-bright underline-offset-2 hover:underline"
       >
         Download CSV template
       </button>
 
       {holdings.length === 0 ? (
-        <section className="rounded-2xl border border-white/[0.08] bg-[#101827] p-6 text-center">
-          <p className="text-sm text-slate-300">No holdings yet.</p>
-          <p className="mt-1 text-xs text-slate-500">Add a ticker or import a CSV to start scoring.</p>
+        <Card padding="lg" className="text-center">
+          <p className="text-sm text-ink-secondary">No holdings yet.</p>
+          <p className="mt-1 text-xs text-ink-faint">Add a ticker or import a CSV to start scoring.</p>
           <div className="mt-4 grid grid-cols-2 gap-2">
             <button
               type="button"
               onClick={() => setCsvOpen(true)}
-              className="min-h-[44px] rounded-xl border border-white/15 text-sm text-slate-200"
+              className="min-h-[44px] rounded-xl border border-line/15 text-sm text-ink-soft"
             >
               Import CSV
             </button>
@@ -76,12 +77,12 @@ export default function HoldingsPage() {
                 setEditing(null);
                 setOpen(true);
               }}
-              className="min-h-[44px] rounded-xl bg-teal-400 text-sm font-semibold text-[#07201c]"
+              className="min-h-[44px] rounded-xl bg-accent text-sm font-semibold text-accent-ink"
             >
               Add holding
             </button>
           </div>
-        </section>
+        </Card>
       ) : (
         <ul className="space-y-2">
           {holdings.map((h) => {
@@ -89,19 +90,19 @@ export default function HoldingsPage() {
             const g = analyses[h.symbol]?.analysis.guidance;
             const px = q?.price ?? null;
             return (
-              <li key={h.id} className="rounded-2xl border border-white/[0.08] bg-[#101827] p-3">
+              <li key={h.id} className={cardClass('sm')}>
                 <Link href={`/analysis/${encodeURIComponent(h.symbol)}`} className="block no-underline">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="font-semibold tabular-nums text-white">{h.symbol}</p>
-                      <p className="text-xs text-slate-400">{h.name}</p>
+                      <p className="font-semibold tabular-nums text-ink">{h.symbol}</p>
+                      <p className="text-xs text-ink-muted">{h.name}</p>
                     </div>
                     <GuidanceBadge label={g?.label} score={g?.orbitScore} action={g?.action} />
                   </div>
-                  <div className="mt-2 grid grid-cols-3 gap-2 text-xs text-slate-400">
+                  <div className="mt-2 grid grid-cols-3 gap-2 text-xs text-ink-muted">
                     <span>Qty {formatNumber(h.quantity, 2)}</span>
                     <span>Avg {formatMoney(h.averagePrice, h.currency)}</span>
-                    <span className="text-right text-white">
+                    <span className="text-right text-ink">
                       {px != null ? formatMoney(px, q?.currency || h.currency) : '—'}
                     </span>
                   </div>
@@ -109,7 +110,7 @@ export default function HoldingsPage() {
                 <div className="mt-2 flex gap-2">
                   <button
                     type="button"
-                    className="min-h-[40px] flex-1 rounded-xl border border-white/10 text-xs text-slate-300"
+                    className="min-h-[40px] flex-1 rounded-xl border border-line/10 text-xs text-ink-secondary"
                     onClick={() => {
                       setEditing(h);
                       setOpen(true);
@@ -119,7 +120,7 @@ export default function HoldingsPage() {
                   </button>
                   <button
                     type="button"
-                    className="min-h-[40px] flex-1 rounded-xl border border-rose-400/20 text-xs text-rose-300"
+                    className="min-h-[40px] flex-1 rounded-xl border border-negative/20 text-xs text-rose-300"
                     onClick={() => removeHolding(h.id)}
                   >
                     Delete

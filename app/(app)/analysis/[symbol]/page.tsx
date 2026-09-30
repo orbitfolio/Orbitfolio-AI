@@ -4,15 +4,16 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import AppShell from '@/app/components/AppShell';
 import GuidanceBadge from '@/app/components/GuidanceBadge';
+import Card from '@/app/components/Card';
 import { formatMoney } from '@/lib/format';
 import { actionFromScore } from '@/lib/market/rating';
 import { useHoldingsStore, type AnalysisView } from '@/lib/store/holdings';
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-white/[0.06] px-3 py-2">
-      <p className="text-[11px] text-slate-500">{label}</p>
-      <p className="tabular-nums text-sm text-white">{value}</p>
+    <div className="rounded-xl border border-line/[0.06] px-3 py-2">
+      <p className="text-[11px] text-ink-faint">{label}</p>
+      <p className="tabular-nums text-sm text-ink">{value}</p>
     </div>
   );
 }
@@ -71,18 +72,18 @@ function AnalysisSymbolBody({ symbol }: { symbol: string }) {
 
   return (
     <AppShell title={symbol}>
-      {loading && !view && <p className="text-sm text-slate-400">Scoring {symbol}...</p>}
-      {note && view && <p className="mb-3 text-xs text-slate-400">{note}</p>}
+      {loading && !view && <p className="text-sm text-ink-muted">Scoring {symbol}...</p>}
+      {note && view && <p className="mb-3 text-xs text-ink-muted">{note}</p>}
       {empty && !view && (
-        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-4">
-          <p className="text-sm text-slate-300">{BUSY_COPY}</p>
+        <div className="rounded-2xl border border-line/[0.08] bg-line/[0.03] p-4">
+          <p className="text-sm text-ink-secondary">{BUSY_COPY}</p>
           <button
             type="button"
             onClick={() => {
               setEmpty(false);
               setTick((n) => n + 1);
             }}
-            className="mt-3 min-h-[40px] rounded-full border border-teal-400/30 bg-teal-400/10 px-4 text-xs font-semibold text-teal-300"
+            className="mt-3 min-h-[40px] rounded-full border border-accent/30 bg-accent/10 px-4 text-xs font-semibold text-accent-bright"
           >
             Retry
           </button>
@@ -90,27 +91,27 @@ function AnalysisSymbolBody({ symbol }: { symbol: string }) {
       )}
       {g && (
         <>
-          <section className="rounded-2xl border border-white/[0.08] bg-[#101827] p-4">
+          <Card>
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-xs text-slate-400">{q?.name || symbol}</p>
-                <p className="mt-1 text-3xl font-semibold tabular-nums text-white">
+                <p className="text-xs text-ink-muted">{q?.name || symbol}</p>
+                <p className="mt-1 text-3xl font-semibold tabular-nums text-ink">
                   {g.orbitScore.toFixed(1)}
-                  <span className="text-base text-slate-500"> / 10</span>
+                  <span className="text-base text-ink-faint"> / 10</span>
                 </p>
               </div>
               <GuidanceBadge label={g.label} score={g.orbitScore} action={action} />
             </div>
             {q?.price != null && (
-              <p className="mt-2 text-sm tabular-nums text-slate-300">
+              <p className="mt-2 text-sm tabular-nums text-ink-secondary">
                 {formatMoney(q.price, q.currency)}
               </p>
             )}
-            <p className="mt-3 text-sm leading-relaxed text-slate-300">{g.rationale}</p>
-          </section>
+            <p className="mt-3 text-sm leading-relaxed text-ink-secondary">{g.rationale}</p>
+          </Card>
 
-          <section className="mt-4 rounded-2xl border border-amber-300/20 bg-amber-300/[0.06] p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-amber-200">
+          <section className="mt-4 rounded-2xl border border-warning/20 bg-warning/[0.06] p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-warning">
               Street consensus
             </p>
             {streetAvailable ? (
@@ -130,13 +131,13 @@ function AnalysisSymbolBody({ symbol }: { symbol: string }) {
                 />
               </div>
             ) : (
-              <p className="mt-2 text-sm text-amber-100/80">
+              <p className="mt-2 text-sm text-warning/80">
                 No published street consensus for this listing.
               </p>
             )}
           </section>
 
-          <p className="mt-4 text-[11px] leading-relaxed text-slate-500">
+          <p className="mt-4 text-[11px] leading-relaxed text-ink-faint">
             Client action (Buy / Hold / Sell) is research guidance. This is not personalized
             regulated advice. Past data is delayed and may be incomplete.
           </p>

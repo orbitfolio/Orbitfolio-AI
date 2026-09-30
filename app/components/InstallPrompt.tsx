@@ -58,7 +58,7 @@ export default function InstallPrompt({ variant = 'banner' }: { variant?: 'banne
         type="button"
         onClick={() => void install()}
         disabled={!deferred}
-        className="min-h-[44px] w-full rounded-xl border border-teal-400/30 bg-teal-400/10 text-sm font-semibold text-teal-200 disabled:border-white/10 disabled:bg-white/[0.03] disabled:text-slate-500"
+        className="min-h-[44px] w-full rounded-xl border border-accent/30 bg-accent/10 text-sm font-semibold text-teal-200 disabled:border-line/10 disabled:bg-line/[0.03] disabled:text-ink-faint"
       >
         Install on Android
       </button>
@@ -68,19 +68,19 @@ export default function InstallPrompt({ variant = 'banner' }: { variant?: 'banne
   if (hidden || !deferred) return null;
 
   return (
-    <div className="sticky top-0 z-10 mb-4 flex items-center gap-2 rounded-2xl border border-teal-400/20 bg-[#10232a] px-3 py-3">
+    <div className="sticky top-0 z-10 mb-4 flex items-center gap-2 rounded-2xl border border-accent/20 bg-[#10232a] px-3 py-3">
       <p className="min-w-0 flex-1 text-sm text-teal-100">Install Orbitfolio on Android for a full-screen app.</p>
       <button
         type="button"
         onClick={() => void install()}
-        className="min-h-[40px] shrink-0 rounded-full bg-teal-400 px-3 text-xs font-semibold text-[#07201c]"
+        className="min-h-[40px] shrink-0 rounded-full bg-accent px-3 text-xs font-semibold text-accent-ink"
       >
         Install on Android
       </button>
       <button
         type="button"
         onClick={() => setHidden(true)}
-        className="min-h-[40px] shrink-0 rounded-full px-2 text-xs text-slate-400"
+        className="min-h-[40px] shrink-0 rounded-full px-2 text-xs text-ink-muted"
         aria-label="Dismiss install banner"
       >
         Not now

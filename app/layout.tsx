@@ -45,7 +45,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
-      <body className={`${inter.className} bg-[#070B14] text-white antialiased`}>
+      <body className={`${inter.className} bg-base text-ink antialiased`}>
         {children}
         <Analytics />
         <SpeedInsights />

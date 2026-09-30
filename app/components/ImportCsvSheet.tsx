@@ -38,15 +38,15 @@ export default function ImportCsvSheet({ open, onClose }: { open: boolean; onClo
   return (
     <div className="fixed inset-0 z-40 flex items-end bg-black/60" onClick={close}>
       <div
-        className="w-full max-w-lg rounded-t-3xl border border-white/[0.08] bg-[#101827] p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
+        className="w-full max-w-lg rounded-t-3xl border border-line/[0.08] bg-card p-4 pb-[max(1rem,env(safe-area-inset-bottom))]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-white/20" />
-        <h2 className="mb-3 text-base font-semibold text-white">Import CSV</h2>
-        <p className="mb-3 text-xs text-slate-400">
+        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-line/20" />
+        <h2 className="mb-3 text-base font-semibold text-ink">Import CSV</h2>
+        <p className="mb-3 text-xs text-ink-muted">
           Columns: ticker, quantity, cost_price, asset_type (optional). Aliases: symbol, qty, avg.
         </p>
-        <label className="flex min-h-[48px] items-center justify-center rounded-xl border border-dashed border-white/20 text-sm text-teal-200">
+        <label className="flex min-h-[48px] items-center justify-center rounded-xl border border-dashed border-line/20 text-sm text-teal-200">
           {fileName || 'Choose CSV file'}
           <input
             type="file"
@@ -59,15 +59,15 @@ export default function ImportCsvSheet({ open, onClose }: { open: boolean; onClo
           />
         </label>
         {parsed && (
-          <div className="mt-3 max-h-56 overflow-auto rounded-xl border border-white/10">
+          <div className="mt-3 max-h-56 overflow-auto rounded-xl border border-line/10">
             {parsed.errors.map((err) => (
-              <p key={`${err.line}-${err.message}`} className="px-3 py-2 text-xs text-amber-300">
+              <p key={`${err.line}-${err.message}`} className="px-3 py-2 text-xs text-warning">
                 Line {err.line}: {err.message}
               </p>
             ))}
             {parsed.rows.map((row) => (
-              <div key={row.ticker} className="flex justify-between px-3 py-2 text-xs text-slate-300">
-                <span className="font-semibold tabular-nums text-white">{row.ticker}</span>
+              <div key={row.ticker} className="flex justify-between px-3 py-2 text-xs text-ink-secondary">
+                <span className="font-semibold tabular-nums text-ink">{row.ticker}</span>
                 <span>
                   {row.quantity} @ {row.cost_price} · {row.market} · {row.asset_type}
                 </span>
@@ -79,7 +79,7 @@ export default function ImportCsvSheet({ open, onClose }: { open: boolean; onClo
           type="button"
           disabled={!parsed?.rows.length}
           onClick={confirm}
-          className="mt-4 min-h-[48px] w-full rounded-xl bg-teal-400 text-sm font-semibold text-[#07201c] disabled:opacity-40"
+          className="mt-4 min-h-[48px] w-full rounded-xl bg-accent text-sm font-semibold text-accent-ink disabled:opacity-40"
         >
           Confirm import
         </button>

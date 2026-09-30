@@ -33,6 +33,9 @@ const ComplianceFooter = () => {
       </div>
 
       <style jsx>{`
+        /* One-off neutrals (pre-token-layer). Intentionally untouched in the
+         * Phase 3 refactor: converting them would change rendered pixels.
+         * Fold into the semantic tokens when the light theme lands. */
         .compliance-footer {
           background: var(--bg-dark, #0a0a0a);
           color: var(--text-muted, #a0a0a0);
