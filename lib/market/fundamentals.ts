@@ -8,9 +8,25 @@ export const FUND_GROUP_WEIGHTS = {
     value: 0.3,
     profitability: 0.35,
     cash: 0.15,
-    safety: 0.12,
+    safety: 0.09,
+    dividends: 0.03,
     growth: 0.08,
 } as const;
+
+/**
+ * A3 capped beta risk adjustment (Phase 5). Returns a small ±1.25 point
+ * adjustment to the technical pillar — ~12% of a full pillar, per the plan's
+ * 10-15% cap, because risk-adjusting momentum has mixed published evidence.
+ * null when beta is unknown; the caller skips the adjustment then.
+ */
+export function betaRiskAdjustment(beta: number | null | undefined, techScore: number): number | null {
+    if (beta == null || !Number.isFinite(beta) || beta <= 0) return null;
+    if (!Number.isFinite(techScore)) return null;
+    const CAP = 1.25;
+    // centered at beta 1.1 (market-ish), sensitivity ±1.0 points per beta unit
+    const raw = (1.1 - beta) * 1.0;
+    return Math.round(Math.max(-CAP, Math.min(CAP, raw)) * 100) / 100;
+}
 
 export interface FundamentalInputs {
     trailingPE?: number | null;
@@ -30,6 +46,8 @@ export interface FundamentalInputs {
     marketCap?: number | null;
     earningsGrowth?: number | null;
     revenueGrowth?: number | null;
+    /** Dividends as a fraction of earnings (Yahoo summaryDetail/stats). */
+    payoutRatio?: number | null;
     name?: string | null;
     quoteType?: string | null;
     symbol?: string | null;
@@ -55,6 +73,8 @@ export interface FundamentalSnapshot {
     fcfConversion: number | null;
     /** Scaled accruals (NI - OCF) / mean(|NI|,|OCF|) in [-2, 2]; <= 0 is conservative. */
     accrualsCheck: number | null;
+    /** Raw payout ratio when scored; null when absent (no dividend data). */
+    dividendSustainability: number | null;
     enterpriseToEbitda: number | null;
     earningsGrowth: number | null;
     revenueGrowth: number | null;
@@ -65,6 +85,7 @@ export interface FundamentalSnapshot {
         profitability: number | null;
         cash: number | null;
         safety: number | null;
+        dividends: number | null;
         growth: number | null;
     };
     weightsUsed: {
@@ -72,6 +93,7 @@ export interface FundamentalSnapshot {
         profitability: number;
         cash: number;
         safety: number;
+        dividends: number;
         growth: number;
     };
 }
@@ -153,6 +175,20 @@ function scoreCurrentRatio(cr: number): number {
     if (cr >= 1.5) return 8;
     if (cr >= 1) return 6.5;
     if (cr >= 0.8) return 4;
+    return 2.5;
+}
+
+/**
+ * A3 dividend sustainability (Phase 5): payout ratio as a fraction of
+ * earnings. Sustainable ≤ 0.6; ≥ 0.8 (or negative earnings paying out)
+ * is risky. No payout data → group skipped and weights renormalize.
+ */
+function scorePayoutRatio(payout: number): number {
+    if (payout < 0) return 4;
+    if (payout <= 0.3) return 8.5;
+    if (payout <= 0.5) return 7;
+    if (payout <= 0.6) return 6;
+    if (payout <= 0.8) return 4;
     return 2.5;
 }
 
@@ -249,6 +285,7 @@ export function computeFundamentals(input: FundamentalInputs): FundamentalSnapsh
     const marketCap = finite(input.marketCap) ? input.marketCap : null;
     const earningsGrowth = finite(input.earningsGrowth) ? input.earningsGrowth : null;
     const revenueGrowth = finite(input.revenueGrowth) ? input.revenueGrowth : null;
+    const payoutRatio = finite(input.payoutRatio) ? input.payoutRatio : null;
 
     const fcfYield =
         freeCashflow != null && marketCap != null && marketCap > 0 ? freeCashflow / marketCap : null;
@@ -332,7 +369,7 @@ export function computeFundamentals(input: FundamentalInputs): FundamentalSnapsh
     }
     const cashScore = mean(cashParts);
 
-    // --- Safety 12% (skip banks) ---
+    // --- Safety 9% (skip banks) ---
     let safetyScore: number | null = null;
     if (!isBankLike(input)) {
         const safetyParts: number[] = [];
@@ -345,6 +382,13 @@ export function computeFundamentals(input: FundamentalInputs): FundamentalSnapsh
             used.push('currentRatio');
         }
         safetyScore = mean(safetyParts);
+    }
+
+    // --- Dividends 3% (A3): payout sustainability; skipped without data ---
+    let dividendScore: number | null = null;
+    if (payoutRatio != null) {
+        dividendScore = scorePayoutRatio(payoutRatio);
+        used.push('dividendSustainability');
     }
 
     // --- Growth 8%: earnings else revenue ---
@@ -362,6 +406,7 @@ export function computeFundamentals(input: FundamentalInputs): FundamentalSnapsh
         profitability: profitabilityScore,
         cash: cashScore,
         safety: safetyScore,
+        dividends: dividendScore,
         growth: growthScore,
     };
 
@@ -371,7 +416,7 @@ export function computeFundamentals(input: FundamentalInputs): FundamentalSnapsh
         if (s != null && Number.isFinite(s)) parts.push({ key, score: s, weight: FUND_GROUP_WEIGHTS[key] });
     });
 
-    const weightsUsed = { value: 0, profitability: 0, cash: 0, safety: 0, growth: 0 };
+    const weightsUsed = { value: 0, profitability: 0, cash: 0, safety: 0, dividends: 0, growth: 0 };
     let score = 5;
     if (parts.length) {
         const sumW = parts.reduce((a, p) => a + p.weight, 0);
@@ -401,6 +446,7 @@ export function computeFundamentals(input: FundamentalInputs): FundamentalSnapsh
         cashConversion: cashConversion != null ? Math.round(cashConversion * 100) / 100 : null,
         fcfConversion: fcfConversion != null ? Math.round(fcfConversion * 100) / 100 : null,
         accrualsCheck: accrualsCheck != null ? Math.round(accrualsCheck * 100) / 100 : null,
+        dividendSustainability: payoutRatio != null ? Math.round(payoutRatio * 1000) / 1000 : null,
         enterpriseToEbitda,
         earningsGrowth,
         revenueGrowth,
@@ -411,6 +457,7 @@ export function computeFundamentals(input: FundamentalInputs): FundamentalSnapsh
             profitability: profitabilityScore != null ? Math.round(profitabilityScore * 10) / 10 : null,
             cash: cashScore != null ? Math.round(cashScore * 10) / 10 : null,
             safety: safetyScore != null ? Math.round(safetyScore * 10) / 10 : null,
+            dividends: dividendScore != null ? Math.round(dividendScore * 10) / 10 : null,
             growth: growthScore != null ? Math.round(growthScore * 10) / 10 : null,
         },
         weightsUsed,
