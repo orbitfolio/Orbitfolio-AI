@@ -5,9 +5,16 @@
  * Research labels stay descriptive (Robust…Fragile).
  * Client action (Buy / Hold / Sell) is derived from orbitScore for clients.
  * Pillars: technical 35%, fundamental 35%, analyst 30% (renormalize if analyst missing).
+ *
+ * Phase 6 (A3 completion): an optional capped beta risk adjustment is applied
+ * to the technical pillar before weighting. The adjustment is bounded to
+ * ±1.25 points (~12% of a pillar) by betaRiskAdjustment() in fundamentals.ts,
+ * and is surfaced on the result so the UI can show it honestly. When beta is
+ * unknown the adjustment is null and the score is exactly the pre-A3 combine.
  */
 
 import type { GuidanceLabel } from '../ai/schemas';
+import { betaRiskAdjustment } from './fundamentals';
 
 export const PILLAR_WEIGHTS = {
     technical: 0.35,
@@ -28,6 +35,8 @@ export interface CombinedRating {
     label: GuidanceLabel;
     action: ClientAction;
     analystAvailable: boolean;
+    /** Capped beta risk adjustment actually applied; null when beta unknown. */
+    riskAdjustment: number | null;
     pillars: {
         technical: number;
         fundamental: number;
@@ -58,11 +67,17 @@ function clamp10(n: number): number {
     return Math.min(10, Math.max(0, n));
 }
 
-export function combineRating(pillars: PillarScores): CombinedRating {
+export function combineRating(pillars: PillarScores, opts: { beta?: number | null } = {}): CombinedRating {
     const technical = clamp10(pillars.technical);
     const fundamental = clamp10(pillars.fundamental);
     const hasAnalyst = pillars.analystConsensus != null && Number.isFinite(pillars.analystConsensus);
     const analyst = hasAnalyst ? clamp10(pillars.analystConsensus as number) : 0;
+
+    // A3: capped beta adjustment on the technical pillar (±1.25 hard cap
+    // inside betaRiskAdjustment). pillars.technical stays raw so the UI can
+    // show the pre-adjustment pillar and the adjustment side by side.
+    const riskAdjustment = betaRiskAdjustment(opts.beta ?? null, technical);
+    const technicalAdjusted = clamp10(technical + (riskAdjustment ?? 0));
 
     let wF = PILLAR_WEIGHTS.fundamental;
     let wT = PILLAR_WEIGHTS.technical;
@@ -72,7 +87,7 @@ export function combineRating(pillars: PillarScores): CombinedRating {
     wT /= sum;
     wA /= sum;
 
-    const raw = fundamental * wF + technical * wT + analyst * wA;
+    const raw = fundamental * wF + technicalAdjusted * wT + analyst * wA;
     const orbitScore = Math.round(clamp10(raw) * 10) / 10;
 
     return {
@@ -80,6 +95,7 @@ export function combineRating(pillars: PillarScores): CombinedRating {
         label: labelFromScore(orbitScore),
         action: actionFromScore(orbitScore),
         analystAvailable: hasAnalyst,
+        riskAdjustment,
         pillars: {
             technical: Math.round(technical * 10) / 10,
             fundamental: Math.round(fundamental * 10) / 10,

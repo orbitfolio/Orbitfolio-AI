@@ -5,15 +5,16 @@ import { useParams } from 'next/navigation';
 import AppShell from '@/app/components/AppShell';
 import GuidanceBadge from '@/app/components/GuidanceBadge';
 import Card from '@/app/components/Card';
+import ScoreBreakdown from '@/app/components/ScoreBreakdown';
 import { formatMoney } from '@/lib/format';
 import { actionFromScore } from '@/lib/market/rating';
 import { useHoldingsStore, type AnalysisView } from '@/lib/store/holdings';
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-line/[0.06] px-3 py-2">
+    <div className="min-w-0 rounded-xl border border-line/[0.06] px-3 py-2">
       <p className="text-[11px] text-ink-faint">{label}</p>
-      <p className="tabular-nums text-sm text-ink">{value}</p>
+      <p className="truncate tabular-nums text-sm text-ink" title={value}>{value}</p>
     </div>
   );
 }
@@ -109,6 +110,15 @@ function AnalysisSymbolBody({ symbol }: { symbol: string }) {
             )}
             <p className="mt-3 text-sm leading-relaxed text-ink-secondary">{g.rationale}</p>
           </Card>
+
+          <ScoreBreakdown
+            pillars={g.pillars}
+            weights={view?.analysis.guidance.weightsUsed ?? null}
+            analystAvailable={g.analystAvailable !== false}
+            riskAdjustment={g.riskAdjustment ?? null}
+            technical={view?.technicals ?? null}
+            fundamentals={view?.fundamentals ?? null}
+          />
 
           <section className="mt-4 rounded-2xl border border-warning/20 bg-warning/[0.06] p-4">
             <p className="text-xs font-semibold uppercase tracking-wide text-warning">

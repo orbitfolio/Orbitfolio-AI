@@ -18,7 +18,7 @@ import {
     FUND_GROUP_WEIGHTS,
     computeFundamentals,
 } from '../lib/market/fundamentals';
-import { PILLAR_WEIGHTS } from '../lib/market/rating';
+import { PILLAR_WEIGHTS, combineRating } from '../lib/market/rating';
 
 const TECH_WEIGHTS_SUM = Object.values(TECH_WEIGHTS).reduce((a, b) => a + b, 0);
 
@@ -143,6 +143,31 @@ test('group weights including dividends sum to 1 and pillar weights untouched', 
     assert.equal(PILLAR_WEIGHTS.technical, 0.35);
     assert.equal(PILLAR_WEIGHTS.fundamental, 0.35);
     assert.equal(PILLAR_WEIGHTS.analystConsensus, 0.3);
+});
+
+test('A3 completion: combineRating applies the capped beta adjustment in the pipeline', () => {
+    const pillars = { technical: 7, fundamental: 6.9, analystConsensus: 5 };
+    const noBeta = combineRating(pillars);
+    assert.equal(noBeta.riskAdjustment, null);
+    assert.equal(noBeta.orbitScore, 6.4); // exact pre-A3 combine
+
+    const highBeta = combineRating(pillars, { beta: 1.7 });
+    assert.equal(highBeta.riskAdjustment, -0.6);
+    assert.equal(highBeta.pillars.technical, 7); // raw pillar preserved for UI
+    // weighted: 0.35*6.4 + 0.35*6.9 + 0.3*5 = 6.165 -> 6.2
+    assert.equal(highBeta.orbitScore, 6.2);
+
+    const lowBeta = combineRating(pillars, { beta: 0.9 });
+    assert.equal(lowBeta.riskAdjustment, 0.2);
+    assert.equal(lowBeta.orbitScore, 6.4); // 0.35*7.2 + 0.35*6.9 + 0.3*5 = 6.435 -> 6.4
+
+    // Cap: extreme beta never moves the pillar by more than 1.25
+    for (const beta of [0.1, 2, 4]) {
+        const r = combineRating(pillars, { beta });
+        assert.ok(Math.abs(r.riskAdjustment!) <= 1.25 + 1e-9);
+        assert.ok(Math.abs(r.riskAdjustment!) / 10 <= 0.15 + 1e-9, 'cap within 15% of pillar');
+        assert.ok(r.orbitScore >= 0 && r.orbitScore <= 10);
+    }
 });
 
 
