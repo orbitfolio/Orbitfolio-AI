@@ -82,6 +82,7 @@ export interface HoldingAnalysisView {
         accrualsCheck?: number | null;
         dividendSustainability?: number | null;
         enterpriseToEbitda: number | null;
+        evEbitdaSource?: 'yahoo' | 'derived' | null;
         earningsGrowth: number | null;
         revenueGrowth: number | null;
         usedFields: string[];
@@ -254,6 +255,8 @@ async function buildViewFromChart(
         operatingCashflow: summary?.operatingCashflow,
         netIncomeToCommon: summary?.netIncomeToCommon,
         enterpriseToEbitda: summary?.enterpriseToEbitda,
+        enterpriseValue: summary?.enterpriseValue,
+        ebitda: summary?.ebitda,
         marketCap: summary?.marketCap,
         earningsGrowth: summary?.earningsGrowth,
         revenueGrowth: summary?.revenueGrowth,
@@ -426,6 +429,7 @@ async function buildViewFromChart(
             accrualsCheck: fundamentals.accrualsCheck,
             dividendSustainability: fundamentals.dividendSustainability,
             enterpriseToEbitda: fundamentals.enterpriseToEbitda,
+            evEbitdaSource: fundamentals.evEbitdaSource,
             earningsGrowth: fundamentals.earningsGrowth,
             revenueGrowth: fundamentals.revenueGrowth,
             usedFields: fundamentals.usedFields,

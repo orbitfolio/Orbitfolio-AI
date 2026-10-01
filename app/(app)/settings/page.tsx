@@ -94,7 +94,7 @@ export default function SettingsPage() {
           <button
             type="button"
             onClick={onClear}
-            className="min-h-[44px] rounded-xl border border-rose-400/25 text-sm text-rose-300"
+            className="min-h-[44px] rounded-xl border border-negative/25 text-sm text-negative"
           >
             Clear
           </button>

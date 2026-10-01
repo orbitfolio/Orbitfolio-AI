@@ -13,7 +13,7 @@ export default function GlobalError({
     <html lang="en" className="dark">
       <body className="bg-base text-ink antialiased">
         <div className="mx-auto flex min-h-dvh max-w-app flex-col justify-center px-6">
-          <p className="text-xs uppercase tracking-[0.18em] text-accent-bright/80">Orbitfolio</p>
+          <p className="text-xs uppercase tracking-[0.18em] text-accent-bright">Orbitfolio</p>
           <h1 className="mt-2 text-2xl font-semibold">App failed to load</h1>
           <p className="mt-2 text-sm text-ink-muted">
             A root-level error occurred. Retry, or reopen the app. Demo holdings stay in

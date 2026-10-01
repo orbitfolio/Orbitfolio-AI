@@ -63,7 +63,7 @@ export default function AppShell({
       <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-line/[0.08] bg-base/90 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur lg:px-2">
         <OrbitMark className="h-7 w-7 shrink-0" />
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] uppercase tracking-[0.18em] text-accent-bright/80">Orbitfolio</p>
+          <p className="text-[11px] uppercase tracking-[0.18em] text-accent-bright">Orbitfolio</p>
           <h1 className="truncate text-lg font-semibold text-ink">{title}</h1>
         </div>
         <div className="flex shrink-0 items-center gap-2">

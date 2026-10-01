@@ -43,6 +43,9 @@ export interface FundamentalInputs {
     operatingCashflow?: number | null;
     netIncomeToCommon?: number | null;
     enterpriseToEbitda?: number | null;
+    /** A0: components of the EV/EBITDA multiple, used to derive it when Yahoo omits the ratio. */
+    enterpriseValue?: number | null;
+    ebitda?: number | null;
     marketCap?: number | null;
     earningsGrowth?: number | null;
     revenueGrowth?: number | null;
@@ -52,6 +55,9 @@ export interface FundamentalInputs {
     quoteType?: string | null;
     symbol?: string | null;
 }
+
+/** Where the EV/EBITDA multiple came from, so the UI never implies more precision than exists. */
+export type EvEbitdaSource = 'yahoo' | 'derived' | null;
 
 export interface FundamentalSnapshot {
     trailingPE: number | null;
@@ -76,6 +82,8 @@ export interface FundamentalSnapshot {
     /** Raw payout ratio when scored; null when absent (no dividend data). */
     dividendSustainability: number | null;
     enterpriseToEbitda: number | null;
+    /** 'yahoo' = reported ratio, 'derived' = computed from enterpriseValue / ebitda, null = absent. */
+    evEbitdaSource: EvEbitdaSource;
     earningsGrowth: number | null;
     revenueGrowth: number | null;
     score: number;
@@ -282,6 +290,8 @@ export function computeFundamentals(input: FundamentalInputs): FundamentalSnapsh
     const operatingCashflow = finite(input.operatingCashflow) ? input.operatingCashflow : null;
     const netIncomeToCommon = finite(input.netIncomeToCommon) ? input.netIncomeToCommon : null;
     const enterpriseToEbitda = finite(input.enterpriseToEbitda) ? input.enterpriseToEbitda : null;
+    const enterpriseValue = finite(input.enterpriseValue) ? input.enterpriseValue : null;
+    const ebitda = finite(input.ebitda) ? input.ebitda : null;
     const marketCap = finite(input.marketCap) ? input.marketCap : null;
     const earningsGrowth = finite(input.earningsGrowth) ? input.earningsGrowth : null;
     const revenueGrowth = finite(input.revenueGrowth) ? input.revenueGrowth : null;
@@ -290,12 +300,30 @@ export function computeFundamentals(input: FundamentalInputs): FundamentalSnapsh
     const fcfYield =
         freeCashflow != null && marketCap != null && marketCap > 0 ? freeCashflow / marketCap : null;
 
+    // --- A0: EV/EBITDA ---
+    // Yahoo omits enterpriseToEbitda for plenty of names. When it does, derive the
+    // same multiple from the two fields it does return, so the value pillar keeps
+    // its primary measure instead of silently degrading to P/B alone. Both inputs
+    // were already fetched and previously discarded.
+    let evEbitda = enterpriseToEbitda;
+    let evEbitdaSource: EvEbitdaSource = enterpriseToEbitda != null ? 'yahoo' : null;
+    const reportedRatioUnusable = enterpriseToEbitda == null || enterpriseToEbitda <= 0;
+    if (reportedRatioUnusable && enterpriseValue != null && ebitda != null && enterpriseValue > 0 && ebitda > 0) {
+        const derived = enterpriseValue / ebitda;
+        // Outside this range the denominator or the units are suspect; skip rather
+        // than score noise. 200x EBITDA is far beyond any plausible real multiple.
+        if (derived > 0 && derived < 200) {
+            evEbitda = Math.round(derived * 100) / 100;
+            evEbitdaSource = 'derived';
+        }
+    }
+
     // --- Value 30% ---
     const valueParts: number[] = [];
-    const evOk = enterpriseToEbitda != null && enterpriseToEbitda > 0;
+    const evOk = evEbitda != null && evEbitda > 0;
     const peOk = trailingPE != null && trailingPE > 0;
     if (evOk) {
-        valueParts.push(scoreEVEBITDA(enterpriseToEbitda));
+        valueParts.push(scoreEVEBITDA(evEbitda!));
         used.push('enterpriseToEbitda');
     } else if (peOk) {
         valueParts.push(scorePE(trailingPE));
@@ -310,7 +338,7 @@ export function computeFundamentals(input: FundamentalInputs): FundamentalSnapsh
     else if (valueParts.length >= 2) {
         // P/B is 1/3 of value; primary multiple is 2/3.
         const pb = priceToBook != null && priceToBook > 0 ? scorePB(priceToBook) : null;
-        const primary = evOk ? scoreEVEBITDA(enterpriseToEbitda!) : peOk ? scorePE(trailingPE!) : null;
+        const primary = evOk ? scoreEVEBITDA(evEbitda!) : peOk ? scorePE(trailingPE!) : null;
         if (primary != null && pb != null) valueScore = (2 / 3) * primary + (1 / 3) * pb;
         else valueScore = mean(valueParts);
     }
@@ -447,7 +475,8 @@ export function computeFundamentals(input: FundamentalInputs): FundamentalSnapsh
         fcfConversion: fcfConversion != null ? Math.round(fcfConversion * 100) / 100 : null,
         accrualsCheck: accrualsCheck != null ? Math.round(accrualsCheck * 100) / 100 : null,
         dividendSustainability: payoutRatio != null ? Math.round(payoutRatio * 1000) / 1000 : null,
-        enterpriseToEbitda,
+        enterpriseToEbitda: evEbitda,
+        evEbitdaSource,
         earningsGrowth,
         revenueGrowth,
         score,
