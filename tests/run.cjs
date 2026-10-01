@@ -25,6 +25,8 @@ const files = [
   'tests/news.test.ts',
   'tests/cash-quality.test.ts',
   'tests/format.test.ts',
+  'tests/snapshots.test.ts',
+  'tests/cache-manager.test.ts',
   'lib/format.ts',
   'lib/market/technicals.ts',
   'lib/market/fundamentals.ts',
@@ -35,6 +37,8 @@ const files = [
   'lib/market/analyst.ts',
   'lib/market/news.ts',
   'lib/market/cache.ts',
+  'lib/market/cache-keys.ts',
+  'lib/market/snapshots.ts',
   'lib/ai/cache/cache-manager.ts',
   'lib/market/ticker-suggest.ts',
   'lib/market/cache-keys.ts',
@@ -80,6 +84,8 @@ const result = spawnSync(
     path.join(outDir, 'tests/news.test.js'),
     path.join(outDir, 'tests/cash-quality.test.js'),
     path.join(outDir, 'tests/format.test.js'),
+    path.join(outDir, 'tests/snapshots.test.js'),
+    path.join(outDir, 'tests/cache-manager.test.js'),
   ],
   { stdio: 'inherit', cwd: root }
 );

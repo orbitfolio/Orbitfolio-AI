@@ -151,15 +151,19 @@ export class CacheManager {
  * Singleton cache manager instance
  */
 let cacheManagerInstance: CacheManager | null = null;
+let sweepTimer: NodeJS.Timeout | null = null;
 
 export function getCacheManager(): CacheManager {
     if (!cacheManagerInstance) {
         cacheManagerInstance = new CacheManager();
 
-        // Run cleanup every 10 minutes
-        setInterval(() => {
+        // Run cleanup every 10 minutes. unref() is load-bearing: a live interval
+        // pins the Node event loop open, so any CLI or test process that merely
+        // reads the cache would hang forever instead of exiting.
+        sweepTimer = setInterval(() => {
             cacheManagerInstance?.cleanExpired();
         }, 10 * 60 * 1000);
+        sweepTimer.unref?.();
     }
 
     return cacheManagerInstance;
