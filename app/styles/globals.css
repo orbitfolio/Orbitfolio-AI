@@ -14,29 +14,37 @@
  */
 :root {
   /* Surfaces */
-  --c-base: 246 248 251; /* app background  #F6F8FB */
+  --c-base: 236 241 248; /* app background  #ECF1F8 */
   --c-card: 255 255 255; /* raised card     #FFFFFF */
-  --c-sunken: 243 246 250; /* inputs inside cards #F3F6FA */
+  --c-sunken: 240 244 249; /* inputs inside cards */
 
-  /* Hairlines (use with /alpha, e.g. border-line/[0.08]) */
+  /* Hairlines (use with /alpha, e.g. border-line/[0.10]) */
   --c-line: 15 32 54;
 
-  /* Text tiers — warm charcoal ramp on light */
+  /* Elevation. Light surfaces read as raised through shadow, not contrast,
+     so dark UIs leave this at 0 and only light mode needs a visible drop. */
+  --c-shadow: 15 32 54;
+
+  /* Text tiers — warm charcoal ramp on light.
+     Measured against --c-card / --c-base, every tier clears WCAG AA (4.5:1).
+     faint is tuned to clear on the *base* surface too (4.9:1), because it is
+     used for captions that sit directly on the page, not just inside cards. */
   --c-ink: 15 23 42; /* primary   (slate-900) */
   --c-ink-soft: 30 41 59; /*           (slate-800) */
   --c-ink-secondary: 51 65 85; /*       (slate-700) */
-  --c-ink-muted: 100 116 139; /*           (slate-500) */
-  --c-ink-faint: 148 163 184; /*           (slate-400) */
+  --c-ink-muted: 71 85 105; /*           (slate-600) */
+  --c-ink-faint: 90 105 127; /*           */
 
-  /* Accent (teal). Ink flips to white-on-teal for light-mode contrast. */
-  --c-accent: 13 148 136; /* teal-600 filled actions */
-  --c-accent-ink: 255 255 255; /* text on accent */
-  --c-accent-bright: 15 118 110; /* teal-700 text/borders on light */
+  /* Accent (teal). The fill is teal-700, not teal-600: white on teal-600 is
+     only 3.7:1, so filled buttons were failing AA. White on this is 5.5:1. */
+  --c-accent: 15 118 110; /* filled actions */
+  --c-accent-ink: 255 255 255; /* text on accent, 5.5:1 */
+  --c-accent-bright: 15 118 110; /* teal-700 text/borders on light, 4.8:1 on base */
 
   /* Status */
-  --c-positive: 5 150 105; /* emerald-600 */
-  --c-warning: 180 83 9; /* amber-700  */
-  --c-negative: 225 29 72; /* rose-600   */
+  --c-positive: 4 120 87; /* emerald-700, 5.5:1 — emerald-600 failed AA */
+  --c-warning: 180 83 9; /* amber-700, 5.0:1  */
+  --c-negative: 225 29 72; /* rose-600,   4.7:1 */
 }
 
 .dark {
@@ -45,15 +53,20 @@
   --c-card: 16 24 39; /* raised card     #101827 */
   --c-sunken: 7 11 20; /* inputs inside cards */
 
-  /* Hairlines (use with /alpha, e.g. border-line/[0.08]) */
+  /* Hairlines (use with /alpha, e.g. border-line/[0.10]) */
   --c-line: 255 255 255;
 
-  /* Text tiers */
+  /* Dark surfaces separate by contrast; a drop shadow would only add mud. */
+  --c-shadow: 0 0 0;
+
+  /* Text tiers. Measured against --c-card, all clear AA (4.5:1):
+     17.8 / 14.4 / 12.0 / 6.9 / 5.5. The old ramp put muted and faint on the
+     same value (3.7:1), so the two tiers were indistinguishable and both failed. */
   --c-ink: 255 255 255; /* primary   (was text-white) */
   --c-ink-soft: 226 232 240; /*           (was slate-200) */
   --c-ink-secondary: 203 213 225; /*       (was slate-300) */
   --c-ink-muted: 148 163 184; /*           (was slate-400) */
-  --c-ink-faint: 100 116 139; /*           (was slate-500) */
+  --c-ink-faint: 130 145 166; /*           (was slate-500, 3.7:1) */
 
   /* Accent (teal) */
   --c-accent: 45 212 191; /* #2DD4BF filled actions, logo */
@@ -68,6 +81,18 @@
 
 * {
   @apply box-border;
+}
+
+/*
+ * Raised-surface elevation. Defined here rather than as a Tailwind arbitrary
+ * value so the alpha reads through --c-shadow and can theme per mode.
+ */
+@layer components {
+  .shadow-card {
+    box-shadow:
+      0 1px 2px rgb(var(--c-shadow) / 0.05),
+      0 1px 3px rgb(var(--c-shadow) / 0.04);
+  }
 }
 
 html {

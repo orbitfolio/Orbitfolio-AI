@@ -23,7 +23,7 @@ function padClass(padding: CardPadding): string {
 }
 
 export function cardClass(padding: CardPadding = 'md', extra = ''): string {
-  return `rounded-2xl border border-line/[0.08] bg-card ${padClass(padding)}${extra ? ` ${extra}` : ''}`;
+  return `rounded-2xl border border-line/[0.10] bg-card shadow-card ${padClass(padding)}${extra ? ` ${extra}` : ''}`;
 }
 
 export default function Card({

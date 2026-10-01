@@ -120,7 +120,7 @@ export default function HoldingsPage() {
                   </button>
                   <button
                     type="button"
-                    className="min-h-[40px] flex-1 rounded-xl border border-negative/20 text-xs text-rose-300"
+                    className="min-h-[40px] flex-1 rounded-xl border border-negative/20 text-xs text-negative"
                     onClick={() => removeHolding(h.id)}
                   >
                     Delete

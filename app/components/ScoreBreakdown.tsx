@@ -30,8 +30,20 @@ export interface ScoreBreakdownProps {
     accrualsCheck?: number | null;
     dividendSustainability?: number | null;
     trailingPE?: number | null;
+    enterpriseToEbitda?: number | null;
+    evEbitdaSource?: 'yahoo' | 'derived' | null;
   } | null;
 }
+
+/**
+ * Why each pillar carries the weight it does. Shown under every bar so the
+ * split is arguable rather than asserted.
+ */
+const PILLAR_WHY: Record<string, string> = {
+  Technicals: 'Price behaviour over 12 months, measured against the market index and risk-adjusted by beta.',
+  Fundamentals: 'What the business earns and what you pay for it — profitability, valuation, cash quality, leverage.',
+  'Analyst consensus': 'Where sell-side analysts land. The weakest of the three inputs, so it carries the least weight.',
+};
 
 function Row({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
@@ -90,9 +102,9 @@ export default function ScoreBreakdown({
           ] as const
         ).map((p) => (
           <div key={p.key}>
-            <div className="flex items-baseline justify-between text-xs">
+            <div className="flex items-baseline justify-between gap-3 text-xs">
               <span className="text-ink-secondary">{p.key}</span>
-              <span className="tabular-nums text-ink-muted">
+              <span className="shrink-0 tabular-nums text-ink-muted">
                 {p.value != null ? `${p.value.toFixed(1)} · ${Math.round(p.weight * 100)}%` : 'N/A · weight redistributed'}
               </span>
             </div>
@@ -102,6 +114,7 @@ export default function ScoreBreakdown({
                 style={{ width: `${p.value != null ? (p.value / 10) * 100 : 0}%` }}
               />
             </div>
+            <p className="mt-1 text-[11px] leading-snug text-ink-faint">{PILLAR_WHY[p.key]}</p>
           </div>
         ))}
       </div>
@@ -157,6 +170,17 @@ export default function ScoreBreakdown({
               value={fundamentals.dividendSustainability != null ? pct(fundamentals.dividendSustainability, 0) : 'no dividend data'}
             />
             <Row label="Trailing P/E" value={fundamentals.trailingPE != null ? num(fundamentals.trailingPE, 1) : '—'} />
+            <Row
+              label="EV / EBITDA"
+              value={
+                fundamentals.enterpriseToEbitda != null ? num(fundamentals.enterpriseToEbitda, 1) : 'not disclosed'
+              }
+              hint={
+                fundamentals.evEbitdaSource === 'derived'
+                  ? '(calculated from enterprise value ÷ EBITDA)'
+                  : undefined
+              }
+            />
           </div>
         </details>
       )}
