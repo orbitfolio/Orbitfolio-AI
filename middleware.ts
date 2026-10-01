@@ -16,14 +16,20 @@ function isPublicApi(pathname: string): boolean {
     if (pathname.startsWith('/api/news')) return true;
     if (pathname.startsWith('/api/analysis')) return true;
     if (pathname.startsWith('/api/health')) return true;
+    if (pathname.startsWith('/api/snapshots')) return true;
     return false;
 }
 
 export async function middleware(req: NextRequest) {
     const res = NextResponse.next();
 
+    // Scheduled jobs arrive without a user IP and would all share one bucket,
+    // so the per-IP limiter must not apply to them. The cron route carries its
+    // own CRON_SECRET check instead.
+    const isCron = req.nextUrl.pathname.startsWith('/api/cron');
+
     // RATE LIMITING: Check before anything else (100 req/hour per IP)
-    if (ratelimit) {
+    if (ratelimit && !isCron) {
         try {
             const identifier =
                 (req as NextRequest & { ip?: string }).ip ??
